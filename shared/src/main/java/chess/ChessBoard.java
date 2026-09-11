@@ -1,5 +1,9 @@
 package chess;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -7,12 +11,47 @@ package chess;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private ChessPiece [][] board;
+    private ChessPiece [][] _board;
 
     public ChessBoard() {
-        board = new ChessPiece[8][8];
+        _board = new ChessPiece[8][8];
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessBoard that = (ChessBoard) o;
+        return Objects.deepEquals(_board, that._board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(_board);
+    }
+
+    @Override
+    public String toString() {
+        String output = "";
+        for (var row  : _board)
+        {
+            for (var item : row)
+            {
+                if (item == null)
+                {
+                    output += " ";
+                }
+                else {
+                    output += item.toString();
+                }
+                output += ", ";
+            }
+        }
+        return "ChessBoard{" +
+                "_board=" + output +
+                '}';
+    }
     /**
      * Adds a chess piece to the chessboard
      *
@@ -22,7 +61,7 @@ public class ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) {
         int row = position.getRow();
         int col = position.getColumn();
-        board[row-1][col-1] = piece;
+        _board[row-1][col-1] = piece;
 //        throw new RuntimeException("Not implemented");
     }
 
@@ -36,7 +75,7 @@ public class ChessBoard {
     public ChessPiece getPiece(ChessPosition position) {
         int row = position.getRow();
         int col = position.getColumn();
-        return board[row-1][col-1];
+        return _board[row-1][col-1];
 //        throw new RuntimeException("Not implemented");
     }
 
@@ -45,6 +84,44 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
+        String board_text = """
+        |r|n|b|q|k|b|n|r|
+        |p|p|p|p|p|p|p|p|
+        | | | | | | | | |
+        | | | | | | | | |
+        | | | | | | | | |
+        | | | | | | | | |
+        |P|P|P|P|P|P|P|P|
+        |R|N|B|Q|K|B|N|R|
+        """;
+        int row = 1;
+        int col = 1;
+        ChessGame.TeamColor color;
+        for (var c : board_text.toCharArray())
+        {
+            switch (c) {
+                case '\n' -> {
+                    row ++;
+                    col = 1;
+                }
+                case '|' -> {}
+                case ' ' -> {
+                    _board[row-1][col-1] = null;
+                    col ++;
+                }
+                default -> {
+                    if (Character.isLowerCase(c)) {color = ChessGame.TeamColor.WHITE;}
+                    else {color = ChessGame.TeamColor.BLACK;}
+                    ChessPiece.PieceType type = ChessPiece.CHARACTER_PIECE_TYPE_MAP.get(Character.toLowerCase(c));
+                    ChessPosition position = new ChessPosition(row, col);
+                    ChessPiece piece = new ChessPiece(color, type);
+                    addPiece(position, piece);
+                    col ++;
+                }
+
+            }
+        }
+
 //        throw new RuntimeException("Not implemented");
     }
 }
