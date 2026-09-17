@@ -35,7 +35,6 @@ public class ChessPiece {
 
     @Override
     public String toString() {
-        // TODO: USE THE CHAR TYPE MAP SO PRINTING IS MORE UNDERSTANDABLE
         String output;
         // prepend char with color
         if (_color == ChessGame.TeamColor.WHITE) {output = "W";}
@@ -75,18 +74,12 @@ public class ChessPiece {
     /**
      * @return Which team this chess piece belongs to
      */
-    public ChessGame.TeamColor getTeamColor() {
-        return _color;
-//        throw new RuntimeException("Not implemented");
-    }
+    public ChessGame.TeamColor getTeamColor() {return _color;}
 
     /**
      * @return which type of chess piece this piece is
      */
-    public PieceType getPieceType() {
-        return _type;
-//        throw new RuntimeException("Not implemented");
-    }
+    public PieceType getPieceType() {return _type;}
 
     /**
      * Calculates all the positions a chess piece can move to
@@ -95,7 +88,7 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
-    }
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {}
+
+
 }

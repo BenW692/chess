@@ -13,6 +13,12 @@ public class ChessMove {
     private ChessPosition _end_pos;
     private ChessPiece.PieceType _promotion_piece;
 
+    public ChessMove(ChessPosition startPosition, ChessPosition endPosition) {
+        _start_pos = startPosition;
+        _end_pos = endPosition;
+        _promotion_piece = null;
+    }
+
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
         _start_pos = startPosition;

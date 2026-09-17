@@ -121,7 +121,5 @@ public class ChessBoard {
 
             }
         }
-
-//        throw new RuntimeException("Not implemented");
     }
 }
