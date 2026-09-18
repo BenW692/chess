@@ -99,6 +99,9 @@ public class ChessPiece {
             case PieceType.KNIGHT -> {
                 moves = opt.knightPieceMoves(board, myPosition);
             }
+            case PieceType.QUEEN -> {
+                moves = opt.queenPieceMoves(board, myPosition);
+            }
             default -> {
                 moves = new ArrayList<>();
             }

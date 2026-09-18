@@ -111,8 +111,19 @@ class PieceMoveOptions{
                 }
             }
         }
-
         return moves;
+    }
+
+    public Collection<ChessMove> queenPieceMoves(ChessBoard board, ChessPosition myPosition) {
+        /*
+         * Options:
+         * call rook and bishop back to back and combine move lists
+         * */
+        Collection<ChessMove> rook_moves = rookPieceMoves(board, myPosition);
+        Collection<ChessMove> bishop_moves = bishopPieceMoves(board, myPosition);
+        // I won't make an additional collection to save compute
+        bishop_moves.addAll(rook_moves);
+        return bishop_moves;
     }
 
     public boolean moveValid(ChessBoard board, ChessPosition myPosition, ChessPosition new_pos, List<ChessMove> moves) {
