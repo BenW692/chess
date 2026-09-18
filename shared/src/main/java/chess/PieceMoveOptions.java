@@ -99,22 +99,24 @@ class PieceMoveOptions{
                 List.of(-1, -1)
         );
         for (var mask : option_mask) {
-
-        }
-        for (int mult = 1; mult < 8; mult++) {
-            // todo: I need to add the adjustment to the original position I cant just multiply
-            int new_row = start_row * mult;
-            int new_col = start_col * mult;
-            ChessPosition new_pos = new ChessPosition(new_row, new_col);
-            if (!moveValid(board, myPosition, new_pos, moves)) {
-                break;
+            int row_adj = mask.getFirst();
+            int col_adj = mask.getLast();
+            for (int mult = 1; mult < 8; mult++) {
+                // todo: I need to add the adjustment to the original position I cant just multiply
+                int new_row = start_row + row_adj * mult;
+                int new_col = start_col + col_adj * mult;
+                ChessPosition new_pos = new ChessPosition(new_row, new_col);
+                if (!moveValid(board, myPosition, new_pos, moves)) {
+                    break;
+                }
             }
         }
+
         return moves;
     }
 
     public boolean moveValid(ChessBoard board, ChessPosition myPosition, ChessPosition new_pos, List<ChessMove> moves) {
-        // TODO: if we are off the board, we need to return False
+        // TODO: maybe change the name because we have to return false on caputring a piece when the move is valid
         if (board.isOutofBounds(new_pos)) {return false;}
         if (board.getPiece(new_pos) == null)
         {
