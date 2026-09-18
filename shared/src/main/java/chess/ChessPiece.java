@@ -102,6 +102,9 @@ public class ChessPiece {
             case PieceType.QUEEN -> {
                 moves = opt.queenPieceMoves(board, myPosition);
             }
+            case PieceType.KING -> {
+                moves = opt.kingPieceMoves(board, myPosition);
+            }
             default -> {
                 moves = new ArrayList<>();
             }

@@ -126,6 +126,46 @@ class PieceMoveOptions{
         return bishop_moves;
     }
 
+    public Collection<ChessMove> kingPieceMoves(ChessBoard board, ChessPosition myPosition) {
+        /*
+         * Options:
+         * use a multiplier on masks for NW, NE, SW, SE
+         * hard code for loops
+         * combine the two
+         * */
+        List<ChessMove> moves = new ArrayList<>();
+        int start_row = myPosition.getRow();
+        int start_col = myPosition.getColumn();
+        List<List<Integer>> option_mask = List.of(
+                //northeast
+                List.of(1, 1),
+                //northwest
+                List.of(1, -1),
+                //southeast
+                List.of(-1, 1),
+                //southwest
+                List.of(-1, -1),
+                //north
+                List.of(1, 0),
+                //west
+                List.of(0, -1),
+                //south
+                List.of(-1, 0),
+                //east
+                List.of(0, 1)
+        );
+        for (var move : option_mask)
+        {
+            int row_adj = move.getFirst();
+            int col_adj = move.getLast();
+            int new_row = start_row + row_adj;
+            int new_col = start_col + col_adj;
+            ChessPosition new_pos = new ChessPosition(new_row, new_col);
+            moveValid(board, myPosition, new_pos, moves);
+        }
+        return moves;
+    }
+
     public boolean moveValid(ChessBoard board, ChessPosition myPosition, ChessPosition new_pos, List<ChessMove> moves) {
         // TODO: maybe change the name because we have to return false on caputring a piece when the move is valid
         if (board.isOutofBounds(new_pos)) {return false;}
