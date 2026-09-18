@@ -166,6 +166,93 @@ class PieceMoveOptions{
         return moves;
     }
 
+    public Collection<ChessMove> pawnPieceMoves(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece) {
+        /*
+         * Options:
+         *
+         * */
+        List<ChessMove> moves = new ArrayList<>();
+        int start_row = myPosition.getRow();
+        int start_col = myPosition.getColumn();
+        /* WHITE */
+        //initial move check
+        if (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            if (myPosition.getRow() == 2) {
+                ChessPosition close_pos = new ChessPosition(start_row + 1, start_col);
+                if (checkCellEmpty(board, close_pos)) {
+                    ChessMove close_move = new ChessMove(myPosition, close_pos);
+                    moves.add(close_move);
+                    ChessPosition far_pos = new ChessPosition(start_row + 2, start_col);
+                    if (checkCellEmpty(board, far_pos)) {
+                        ChessMove far_move = new ChessMove(myPosition, far_pos);
+                        moves.add(far_move);
+                    }
+                }
+
+            }
+            // promotion
+            else if (myPosition.getRow() == 7) {
+                ChessPosition prom_pos = new ChessPosition(start_row + 1, start_col);
+                if (checkCellEmpty(board, prom_pos)) {
+                    for (var type : ChessPiece.PieceType.values()) {
+                        if (type == ChessPiece.PieceType.PAWN || type == ChessPiece.PieceType.KING) {continue;}
+                        ChessMove prom_move = new ChessMove(myPosition, prom_pos, type);
+                        moves.add(prom_move);
+                    }
+                }
+            }
+            // normal move to empty space
+            else {
+                ChessPosition norm_pos = new ChessPosition(start_row + 1, start_col);
+                if (checkCellEmpty(board, norm_pos)) {
+                    ChessMove close_move = new ChessMove(myPosition, norm_pos);
+                    moves.add(close_move);
+                }
+            }
+            List<ChessMove> attack_moves = whiteDiagonalAttack(board, myPosition);
+            moves.addAll(attack_moves);
+        }
+        /* BLACK */
+        //initial move check
+        else if (myPiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+            if (myPosition.getRow() == 7) {
+                ChessPosition close_pos = new ChessPosition(start_row - 1, start_col);
+                if (checkCellEmpty(board, close_pos)) {
+                    ChessMove close_move = new ChessMove(myPosition, close_pos);
+                    moves.add(close_move);
+                    ChessPosition far_pos = new ChessPosition(start_row - 2, start_col);
+                    if (checkCellEmpty(board, far_pos)) {
+                        ChessMove far_move = new ChessMove(myPosition, far_pos);
+                        moves.add(far_move);
+                    }
+                }
+
+            }
+            // promotion
+            else if (myPosition.getRow() == 2) {
+                ChessPosition prom_pos = new ChessPosition(start_row - 1, start_col);
+                if (checkCellEmpty(board, prom_pos)) {
+                    for (var type : ChessPiece.PieceType.values()) {
+                        if (type == ChessPiece.PieceType.PAWN || type == ChessPiece.PieceType.KING) {continue;}
+                        ChessMove prom_move = new ChessMove(myPosition, prom_pos, type);
+                        moves.add(prom_move);
+                    }
+                }
+            }
+            // normal move to empty space
+            else {
+                ChessPosition norm_pos = new ChessPosition(start_row - 1, start_col);
+                if (checkCellEmpty(board, norm_pos)) {
+                    ChessMove close_move = new ChessMove(myPosition, norm_pos);
+                    moves.add(close_move);
+                }
+            }
+            List<ChessMove> attack_moves = blackDiagonalAttack(board, myPosition);
+            moves.addAll(attack_moves);
+        }
+        return moves;
+    }
+
     public boolean moveValid(ChessBoard board, ChessPosition myPosition, ChessPosition new_pos, List<ChessMove> moves) {
         // TODO: maybe change the name because we have to return false on caputring a piece when the move is valid
         if (board.isOutofBounds(new_pos)) {return false;}
@@ -181,5 +268,91 @@ class PieceMoveOptions{
             return false;
         }
         else {return false;}
+    }
+
+    public boolean checkCellEmpty(ChessBoard board, ChessPosition pos){
+        return board.getPiece(pos) == null;
+    }
+    
+    public List<ChessMove> whiteDiagonalAttack (ChessBoard board, ChessPosition myPosition){
+        List<ChessMove> moves = new ArrayList<>();
+        int start_row = myPosition.getRow();
+        int start_col = myPosition.getColumn();
+        ChessPosition left_pos = new ChessPosition(start_row + 1, start_col -1);
+        ChessPosition right_pos = new ChessPosition(start_row + 1, start_col + 1);
+        if (!board.isOutofBounds(left_pos) && !checkCellEmpty(board, left_pos)) {
+            if (board.getPiece(left_pos).getTeamColor() != board.getPiece(myPosition).getTeamColor()
+                    && !board.isOutofBounds(left_pos)) {
+                if (start_row == 7){
+                    for (var type : ChessPiece.PieceType.values()) {
+                        if (type == ChessPiece.PieceType.PAWN || type == ChessPiece.PieceType.KING) {continue;}
+                        ChessMove prom_move = new ChessMove(myPosition, left_pos, type);
+                        moves.add(prom_move);
+                    }
+                }
+                else {
+                    ChessMove move = new ChessMove(myPosition, left_pos);
+                    moves.add(move);
+                }
+            }
+        }
+        if (!board.isOutofBounds(right_pos) && !checkCellEmpty(board, right_pos)) {
+            if (board.getPiece(right_pos).getTeamColor() != board.getPiece(myPosition).getTeamColor()
+                    && !board.isOutofBounds(right_pos)) {
+                if (start_row == 7){
+                    for (var type : ChessPiece.PieceType.values()) {
+                        if (type == ChessPiece.PieceType.PAWN || type == ChessPiece.PieceType.KING) {continue;}
+                        ChessMove prom_move = new ChessMove(myPosition, right_pos, type);
+                        moves.add(prom_move);
+                    }
+                }
+                else {
+                    ChessMove move = new ChessMove(myPosition, right_pos);
+                    moves.add(move);
+                }
+            }
+        }
+        return moves;
+    }
+
+    public List<ChessMove> blackDiagonalAttack (ChessBoard board, ChessPosition myPosition){
+        List<ChessMove> moves = new ArrayList<>();
+        int start_row = myPosition.getRow();
+        int start_col = myPosition.getColumn();
+        ChessPosition left_pos = new ChessPosition(start_row - 1, start_col -1);
+        ChessPosition right_pos = new ChessPosition(start_row - 1, start_col + 1);
+        if (!board.isOutofBounds(left_pos) && !checkCellEmpty(board, left_pos)) {
+            if (board.getPiece(left_pos).getTeamColor() != board.getPiece(myPosition).getTeamColor()
+                    && !board.isOutofBounds(left_pos)) {
+                if (start_row == 2){
+                    for (var type : ChessPiece.PieceType.values()) {
+                        if (type == ChessPiece.PieceType.PAWN || type == ChessPiece.PieceType.KING) {continue;}
+                        ChessMove prom_move = new ChessMove(myPosition, left_pos, type);
+                        moves.add(prom_move);
+                    }
+                }
+                else {
+                    ChessMove move = new ChessMove(myPosition, left_pos);
+                    moves.add(move);
+                }
+            }
+        }
+        if (!board.isOutofBounds(right_pos) && !checkCellEmpty(board, right_pos)) {
+            if (board.getPiece(right_pos).getTeamColor() != board.getPiece(myPosition).getTeamColor()
+                    && !board.isOutofBounds(right_pos)) {
+                if (start_row == 2){
+                    for (var type : ChessPiece.PieceType.values()) {
+                        if (type == ChessPiece.PieceType.PAWN || type == ChessPiece.PieceType.KING) {continue;}
+                        ChessMove prom_move = new ChessMove(myPosition, right_pos, type);
+                        moves.add(prom_move);
+                    }
+                }
+                else {
+                    ChessMove move = new ChessMove(myPosition, right_pos);
+                    moves.add(move);
+                }
+            }
+        }
+        return moves;
     }
 }
