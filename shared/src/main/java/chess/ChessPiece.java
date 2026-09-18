@@ -1,8 +1,6 @@
 package chess;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Represents a single chess piece
@@ -88,7 +86,23 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {}
-
-
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves;
+        PieceMoveOptions opt = new PieceMoveOptions();
+        switch (this._type) {
+            case PieceType.ROOK -> {
+                moves = opt.rookPieceMoves(board, myPosition);
+            }
+            case PieceType.BISHOP -> {
+                moves = opt.bishopPieceMoves(board, myPosition);
+            }
+            case PieceType.KNIGHT -> {
+                moves = opt.knightPieceMoves(board, myPosition);
+            }
+            default -> {
+                moves = new ArrayList<>();
+            }
+        }
+        return moves;
+    }
 }

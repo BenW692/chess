@@ -122,4 +122,14 @@ public class ChessBoard {
             }
         }
     }
+
+    public boolean isOutofBounds(ChessPosition pos)
+    {
+        int row = pos.getRow();
+        int col = pos.getColumn();
+        if (row > 8 || row < 1) {return true;}
+        if (col > 8 || col < 1) {return true;}
+        // else both the row and col are in the bounds of the board
+        return false;
+    }
 }
