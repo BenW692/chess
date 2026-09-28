@@ -87,29 +87,28 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> moves;
-        PieceMoveOptions opt = new PieceMoveOptions();
-        switch (this._type) {
-            case PieceType.ROOK -> {
-                moves = opt.rookPieceMoves(board, myPosition);
+        Collection<ChessMove> moves = new ArrayList<>();
+        ChessGame.TeamColor color = _color;
+        PieceMoveOptions pieceMoveOptions = new PieceMoveOptions();
+        switch (_type)
+        {
+            case KING -> {
+                moves = pieceMoveOptions.kingPieceMoves(board, myPosition, color);
             }
-            case PieceType.BISHOP -> {
-                moves = opt.bishopPieceMoves(board, myPosition);
+            case KNIGHT -> {
+                moves = pieceMoveOptions.knightPieceMoves(board, myPosition, color);
             }
-            case PieceType.KNIGHT -> {
-                moves = opt.knightPieceMoves(board, myPosition);
+            case ROOK -> {
+                moves = pieceMoveOptions.rookPieceMoves(board, myPosition, color);
             }
-            case PieceType.QUEEN -> {
-                moves = opt.queenPieceMoves(board, myPosition);
+            case BISHOP -> {
+                moves = pieceMoveOptions.bishopPieceMoves(board, myPosition, color);
             }
-            case PieceType.KING -> {
-                moves = opt.kingPieceMoves(board, myPosition);
+            case QUEEN -> {
+                moves = pieceMoveOptions.queenPieceMoves(board, myPosition, color);
             }
-            case PieceType.PAWN -> {
-                moves = opt.pawnPieceMoves(board, myPosition, this);
-            }
-            default -> {
-                moves = new ArrayList<>();
+            case PAWN -> {
+                moves = pieceMoveOptions.pawnPieceMoves(board, myPosition, color);
             }
         }
         return moves;

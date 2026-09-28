@@ -121,6 +121,7 @@ public class ChessBoard {
 
             }
         }
+        col ++;
     }
 
     public boolean isOutofBounds(ChessPosition pos)
