@@ -47,9 +47,9 @@ public class ChessBoard {
                 }
                 output += ", ";
             }
+            output += "\n";
         }
-        return "ChessBoard{" +
-                "_board=" + output +
+        return "ChessBoard{\n" + output +
                 '}';
     }
     /**
@@ -121,7 +121,6 @@ public class ChessBoard {
 
             }
         }
-        col ++;
     }
 
     public boolean isOutofBounds(ChessPosition pos)

@@ -33,10 +33,9 @@ public class ChessPosition {
 
     @Override
     public String toString() {
-        return "ChessPosition{" +
-                "_row=" + _row +
-                ", _col=" + _col +
-                '}';
+        return "(R" +_row +
+                ", C" + _col +
+                ')';
     }
 
     /**

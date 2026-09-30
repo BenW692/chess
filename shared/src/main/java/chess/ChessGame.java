@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -49,7 +50,16 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> validMoves = new ArrayList<>();
+        Collection<ChessMove> potentialMoves = new ArrayList<>();
+        ChessPiece piece = _gameBoard.getPiece(startPosition);
+        if (piece == null) {return null;}
+        else {
+            potentialMoves = piece.pieceMoves(_gameBoard, startPosition);
+        }
+        // todo: Do I want validMoves to enforce checking if a move puts player in checkmate, or let makeMove do that?
+        validMoves.addAll(potentialMoves);
+        return validMoves;
     }
 
     /**
@@ -59,7 +69,32 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        // if the move would place king in check it needs to throw invalidmoveexception
+        ChessPosition start_pos = move.getStartPosition();
+        ChessPosition target_pos = move.getEndPosition();
+        ChessPiece target_piece = _gameBoard.getPiece(target_pos);
+        ChessPiece movingPiece = _gameBoard.getPiece(start_pos);
+
+        // todo: do I need to keep track of what pieces got captured?
+        if (movingPiece == null) {
+            throw new InvalidMoveException("There is no piece at the supplied starting position.");
+        }
+        else if (movingPiece.getTeamColor() != _teamTurn) {
+            throw new InvalidMoveException("That piece cannot be moved because it is the other team's turn");
+        }
+
+        Collection<ChessMove> vMoves = validMoves(start_pos);
+        for (var vMove : vMoves) {
+            if (move.equals(vMove)) {
+                _gameBoard.addPiece(target_pos, movingPiece);
+                _gameBoard.addPiece(start_pos, null);
+                if (_teamTurn == TeamColor.WHITE) {setTeamTurn(TeamColor.BLACK);}
+                else {setTeamTurn(TeamColor.WHITE);}
+                return;
+            }
+        }
+        throw new InvalidMoveException("The supplied move is not a valid move");
+
     }
 
     /**

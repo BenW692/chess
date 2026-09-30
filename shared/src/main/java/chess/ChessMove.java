@@ -43,11 +43,16 @@ public class ChessMove {
 
     @Override
     public String toString() {
-        return "ChessMove{" +
-                "_start_pos=" + _start_pos +
-                ", _end_pos=" + _end_pos +
-                ", _promotion_piece=" + ChessPiece.PIECE_TYPE_CHARACTER_MAP.get(_promotion_piece) +
-                '}';
+        String output_str = "(";
+        if (_promotion_piece == null) {
+            output_str += _start_pos +"->" + _end_pos;
+        }
+        else {
+            output_str += _start_pos +"->" + _end_pos +
+                    " P:" + ChessPiece.PIECE_TYPE_CHARACTER_MAP.get(_promotion_piece);
+        }
+        output_str += ")";
+        return output_str;
     }
 
     /**
