@@ -13,6 +13,8 @@ import java.util.Objects;
 public class ChessBoard {
     private ChessPiece [][] _board;
 
+    public ChessBoard(ChessBoard other) {this._board = other._board;}
+
     public ChessBoard() {
         _board = new ChessPiece[8][8];
     }
@@ -62,7 +64,6 @@ public class ChessBoard {
         int row = position.getRow();
         int col = position.getColumn();
         _board[row-1][col-1] = piece;
-//        throw new RuntimeException("Not implemented");
     }
 
     /**

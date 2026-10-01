@@ -111,6 +111,7 @@ public class ChessPiece {
                 moves = pieceMoveOptions.pawnPieceMoves(board, myPosition, color);
             }
         }
+        // todo: Should we mark a team being in check here by iterating through all the newly valid moves? NO. WE HAVE TO ITERATE THROUGH THE WHOLE LIST NO MATTER WHAT SO WE MIGHT AS WELL DO THAT IN VALID MOVES TO ENCAPSULATE FUNCTIONALITY
         return moves;
     }
 }
