@@ -104,6 +104,11 @@ public class ChessGame {
                 ChessPosition posCheck = new ChessPosition(row, col);
                 ChessPiece pieceCheck = temp_board.getPiece(posCheck);
                 if (pieceCheck == null) {continue;}
+                if (pieceCheck.getPieceType() == ChessPiece.PieceType.KING)
+                {
+                    if (pieceCheck.getTeamColor() == TeamColor.WHITE) {_whiteTeamKingPos = posCheck;}
+                    else {_blackTeamKingPos = posCheck;}
+                }
                 // the piece is the same team, so it doesn't threaten check
                 else if (pieceCheck.getTeamColor() == teamColor) {
                     continue;
@@ -166,6 +171,10 @@ public class ChessGame {
         for (var vMove : vMoves) {
             if (move.equals(vMove)) {
                 _gameBoard.movePiece(move);
+                if (move.getPromotionPiece() != null)
+                {
+                    movingPiece.promotePiece(move.getPromotionPiece());
+                }
                 // update team turns
                 if (_currTeamTurn == TeamColor.WHITE) {setTeamTurn(TeamColor.BLACK);}
                 else {setTeamTurn(TeamColor.WHITE);}
