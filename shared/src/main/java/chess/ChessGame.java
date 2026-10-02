@@ -151,8 +151,32 @@ public class ChessGame {
         // make a temp board where that move is completed
         ChessBoard tempBoard = new ChessBoard(_gameBoard);
         makeTempMove(move, tempBoard);
-        if (isInCheck(teamColor, tempBoard)) {return false;}
-        else {return true;}
+        Map<TeamColor, ChessPosition> kingPos = updateKingPos(tempBoard);
+        for (int row = 1; row < 9; row ++) {
+            for (int col = 1; col < 9; col++) {
+                // check every piece on the board
+                ChessPosition posCheck = new ChessPosition(row, col);
+                ChessPiece pieceCheck = tempBoard.getPiece(posCheck);
+                if (pieceCheck == null) {
+                    continue;
+                }
+                // the piece is the supplied team's color
+                else if (pieceCheck.getTeamColor() == teamColor) {
+                    continue;
+                }
+                // the piece is the other eam
+                else {
+                    Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(tempBoard, posCheck);
+                    for (var newMove : enemyMoves) {
+                        // can the other team's piece attack our king?
+                        if (newMove.getEndPosition() == kingPos.get(teamColor)) {
+                            return canCaptureToEscape(posCheck, tempBoard, teamColor);
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public void makeTempMove(ChessMove move, ChessBoard tempBoard) {
@@ -201,6 +225,33 @@ public class ChessGame {
         throw new InvalidMoveException("The supplied move is not a valid move");
     }
 
+    public boolean canCaptureToEscape(ChessPosition posToCapture, ChessBoard board, TeamColor attackingTeamColor)
+    {
+        for (int row = 1; row < 9; row ++) {
+            for (int col = 1; col < 9; col++) {
+                ChessPosition posCheck = new ChessPosition(row, col);
+                ChessPiece pieceCheck = _gameBoard.getPiece(posCheck);
+                if (pieceCheck == null) {
+                    continue;
+                }
+                // the piece is the other team's color
+                else if (pieceCheck.getTeamColor() != attackingTeamColor) {
+                    continue;
+                }
+                else {
+                    Collection<ChessMove> attackMoves = pieceCheck.pieceMoves(board, posCheck);
+                    for (var newMove : attackMoves) {
+                        // can this piece attack our king?
+                        if (newMove.getEndPosition().equals(posToCapture)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Determines if the given team is in check
@@ -222,12 +273,12 @@ public class ChessGame {
                 else if (pieceCheck.getTeamColor() == teamColor) {
                     continue;
                 }
-                // the piece i the other team
+                // the piece is the other team
                 else {
                     Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(_gameBoard, posCheck);
                     for (var newMove : enemyMoves) {
                         // can this piece attack our king?
-                        if (newMove.getEndPosition() == kingPos.get(teamColor)) {
+                        if (newMove.getEndPosition().equals(kingPos.get(teamColor))) {
                             return true;
                         }
                     }
@@ -238,31 +289,6 @@ public class ChessGame {
     }
 
     public boolean isInCheck(TeamColor teamColor, ChessBoard tempBoard) {
-        Map<TeamColor, ChessPosition> kingPos = updateKingPos(tempBoard);
-        for (int row = 1; row < 9; row ++) {
-            for (int col = 1; col < 9; col++) {
-                // check every piece on the board
-                ChessPosition posCheck = new ChessPosition(row, col);
-                ChessPiece pieceCheck = tempBoard.getPiece(posCheck);
-                if (pieceCheck == null) {
-                    continue;
-                }
-                // the piece is the supplied team's color
-                else if (pieceCheck.getTeamColor() == teamColor) {
-                    continue;
-                }
-                // the piece is the other eam
-                else {
-                    Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(tempBoard, posCheck);
-                    for (var newMove : enemyMoves) {
-                        // can the other team's piece attack our king?
-                        if (newMove.getEndPosition() == kingPos.get(teamColor)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
         return false;
     }
 
@@ -273,7 +299,27 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)) {return false;}
+        else {
+            Collection<ChessMove> totalValidMoves = new ArrayList<>();
+            for (int row = 1; row < 9; row++) {
+                for (int col = 1; col < 9; col++) {
+                    ChessPosition posCheck = new ChessPosition(row, col);
+                    ChessPiece pieceCheck = _gameBoard.getPiece(posCheck);
+                    if (pieceCheck == null) {continue;}
+                    // the piece is the other team, so it doesn't help us get out of check
+                    else if (pieceCheck.getTeamColor() != teamColor) {
+                        continue;
+                    }
+                    // piece is our team, so we need to check if can stop opponent check
+                    else {
+                        totalValidMoves.addAll(validMoves(posCheck));
+                        if (!totalValidMoves.isEmpty()) {return false;}
+                    }
+                }
+            }
+            return true;
+        }
     }
 
     /**
