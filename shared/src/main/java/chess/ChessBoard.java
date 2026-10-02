@@ -44,16 +44,17 @@ public class ChessBoard {
         String output = "";
         for (int row = 7; row >= 0; row --)
         {
+            output += "|";
             for (var item : _board[row])
             {
                 if (item == null)
                 {
-                    output += " ";
+                    output += "  ";
                 }
                 else {
                     output += item.toString();
                 }
-                output += "| ";
+                output += "|";
             }
             output += "\n";
         }

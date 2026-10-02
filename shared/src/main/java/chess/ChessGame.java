@@ -2,6 +2,8 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A class that can manage a chess game, making moves on a board
@@ -75,19 +77,38 @@ public class ChessGame {
             }
         }
         else {
-            // we have to get out of check
+            for (var move : potentialMoves) {
+                // the move never threatened check so it can be added
+                if (!doesMoveGetOutOfCheck(move)) {
+                    validMoves.add(move);
+                }
+            }
         }
         return validMoves;
+    }
 
-        // are we in check?
-            // get out of check (those are the only valid moves)
-        // else
-            //make sure the move options don't put us in check
-                // make a temp board where that move is completed. Is team in check with that move?
-                // for loop over pieceMoves for all opposing pieces. If one of those moves is the team's king, break
-                    // yes, skip the move
-                    // no, keep the valid move
-                        // check if the move ends on the other teams king, so we can mark the other team is in check
+    public Map<TeamColor, ChessPosition> updateKingPos(ChessBoard board) {
+        Map<TeamColor, ChessPosition> kingPos = new HashMap<>();
+        for (int row = 1; row < 9; row++) {
+            for (int col = 1; col < 9; col++) {
+                ChessPosition posCheck = new ChessPosition(row, col);
+                ChessPiece pieceCheck = board.getPiece(posCheck);
+                if (pieceCheck == null) {continue;}
+                if (pieceCheck.getPieceType() == ChessPiece.PieceType.KING) {
+                    if (pieceCheck.getTeamColor() == TeamColor.WHITE) {
+                        _whiteTeamKingPos = posCheck;
+                        kingPos.put(TeamColor.WHITE, posCheck);
+                    } else {
+                        kingPos.put(TeamColor.BLACK, posCheck);
+                    }
+                    if (kingPos.size() == 2)
+                    {
+                        return kingPos;
+                    }
+                }
+            }
+        }
+        return kingPos;
     }
 
 
@@ -96,28 +117,24 @@ public class ChessGame {
         //make sure the move won't put us in check
         TeamColor teamColor = _gameBoard.getPiece(move.getStartPosition()).getTeamColor();
         // make a temp board where that move is completed. Is team in check with that move?
-        ChessBoard temp_board = new ChessBoard(_gameBoard);
-        makeTempMove(move, temp_board);
+        ChessBoard tempBoard = new ChessBoard(_gameBoard);
+        makeTempMove(move, tempBoard);
+        Map<TeamColor, ChessPosition> kingPos = updateKingPos(tempBoard);
         // for loop over pieceMoves for all opposing pieces. If one of those moves is the team's king, break
         for (int row = 1; row < 9; row++) {
             for (int col = 1; col < 9; col++) {
                 ChessPosition posCheck = new ChessPosition(row, col);
-                ChessPiece pieceCheck = temp_board.getPiece(posCheck);
+                ChessPiece pieceCheck = tempBoard.getPiece(posCheck);
                 if (pieceCheck == null) {continue;}
-                if (pieceCheck.getPieceType() == ChessPiece.PieceType.KING)
-                {
-                    if (pieceCheck.getTeamColor() == TeamColor.WHITE) {_whiteTeamKingPos = posCheck;}
-                    else {_blackTeamKingPos = posCheck;}
-                }
                 // the piece is the same team, so it doesn't threaten check
                 else if (pieceCheck.getTeamColor() == teamColor) {
                     continue;
                 }
                 // piece is other team, so we need to check if it threatens check
                 else {
-                    Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(temp_board, posCheck);
+                    Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(tempBoard, posCheck);
                     for (var enemyMove : enemyMoves) {
-                        if (enemyMove.getEndPosition().equals(getCurrKingPos())) {
+                        if (enemyMove.getEndPosition().equals(kingPos.get(teamColor))) {
                             return true;
                             }
                         // else we keep checking;
@@ -128,6 +145,16 @@ public class ChessGame {
             return false;
         }
 
+
+    public boolean doesMoveGetOutOfCheck(ChessMove move) {
+        TeamColor teamColor = _gameBoard.getPiece(move.getStartPosition()).getTeamColor();
+        // make a temp board where that move is completed
+        ChessBoard tempBoard = new ChessBoard(_gameBoard);
+        makeTempMove(move, tempBoard);
+        if (isInCheck(teamColor, tempBoard)) {return false;}
+        else {return true;}
+    }
+
     public void makeTempMove(ChessMove move, ChessBoard tempBoard) {
         // I do not need to check if this is an impossible move, because this function only gets called with good moves passed in
         ChessPosition start_pos = move.getStartPosition();
@@ -136,16 +163,6 @@ public class ChessGame {
         ChessPiece movingPiece = tempBoard.getPiece(start_pos);
         tempBoard.addPiece(target_pos, movingPiece);
         tempBoard.addPiece(start_pos, null);
-    }
-
-    private ChessPosition getCurrKingPos() {
-        if (_currTeamTurn == TeamColor.WHITE) {return _whiteTeamKingPos;}
-        else {return _blackTeamKingPos;}
-    }
-
-    private ChessPosition getOppKingPos() {
-        if (_currTeamTurn == TeamColor.WHITE) {return _blackTeamKingPos;}
-        else {return _whiteTeamKingPos;}
     }
 
     /**
@@ -184,11 +201,7 @@ public class ChessGame {
         throw new InvalidMoveException("The supplied move is not a valid move");
     }
 
-    private void setOppTeamToCheck()
-    {
-        if (_currTeamTurn == TeamColor.WHITE) {_isBlackTeamInCheck = true;}
-        else {_isWhiteTeamInCheck = true;}
-    }
+
     /**
      * Determines if the given team is in check
      *
@@ -196,6 +209,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
+        Map<TeamColor, ChessPosition> kingPos = updateKingPos(_gameBoard);
         // for loop over pieceMoves for all pieces. If one of those moves is the other team's king, break
         for (int row = 1; row < 9; row ++) {
             for (int col = 1; col < 9; col++) {
@@ -207,13 +221,42 @@ public class ChessGame {
                 // the piece is the supplied team's color
                 else if (pieceCheck.getTeamColor() == teamColor) {
                     continue;
-                } else {
+                }
+                // the piece i the other team
+                else {
                     Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(_gameBoard, posCheck);
                     for (var newMove : enemyMoves) {
-                        ChessPosition kingPos;
-                        if (teamColor == TeamColor.WHITE) {kingPos = _whiteTeamKingPos;}
-                        else {kingPos = _blackTeamKingPos;}
-                        if (newMove.getEndPosition() == kingPos) {
+                        // can this piece attack our king?
+                        if (newMove.getEndPosition() == kingPos.get(teamColor)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isInCheck(TeamColor teamColor, ChessBoard tempBoard) {
+        Map<TeamColor, ChessPosition> kingPos = updateKingPos(tempBoard);
+        for (int row = 1; row < 9; row ++) {
+            for (int col = 1; col < 9; col++) {
+                // check every piece on the board
+                ChessPosition posCheck = new ChessPosition(row, col);
+                ChessPiece pieceCheck = tempBoard.getPiece(posCheck);
+                if (pieceCheck == null) {
+                    continue;
+                }
+                // the piece is the supplied team's color
+                else if (pieceCheck.getTeamColor() == teamColor) {
+                    continue;
+                }
+                // the piece is the other eam
+                else {
+                    Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(tempBoard, posCheck);
+                    for (var newMove : enemyMoves) {
+                        // can the other team's piece attack our king?
+                        if (newMove.getEndPosition() == kingPos.get(teamColor)) {
                             return true;
                         }
                     }
