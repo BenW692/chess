@@ -1,9 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A class that can manage a chess game, making moves on a board
@@ -13,18 +10,25 @@ import java.util.Map;
  */
 public class ChessGame {
     private TeamColor _currTeamTurn = TeamColor.WHITE;
-    private TeamColor _notCurrTeam = TeamColor.BLACK;
     private ChessBoard _gameBoard;
-    private boolean _isWhiteTeamInCheck = false;
-    private boolean _isBlackTeamInCheck = false;
-
-    // todo: These flags will not with the unit tests I have to pass. Can I sweep through initial test board and find King and set this position?
-    private ChessPosition _whiteTeamKingPos = new ChessPosition(1, 5);
-    private ChessPosition _blackTeamKingPos = new ChessPosition(8, 5);
 
     public ChessGame() {
         _gameBoard = new ChessBoard();
         _gameBoard.resetBoard();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return _currTeamTurn == chessGame._currTeamTurn && Objects.equals(_gameBoard, chessGame._gameBoard);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_currTeamTurn, _gameBoard);
     }
 
     /**
@@ -41,8 +45,6 @@ public class ChessGame {
      */
     public void setTeamTurn(TeamColor team) {
         _currTeamTurn = team;
-        if (team == TeamColor.BLACK) {_notCurrTeam = TeamColor.WHITE;}
-        else {_notCurrTeam = TeamColor.BLACK;}
     }
 
     /**
@@ -96,7 +98,6 @@ public class ChessGame {
                 if (pieceCheck == null) {continue;}
                 if (pieceCheck.getPieceType() == ChessPiece.PieceType.KING) {
                     if (pieceCheck.getTeamColor() == TeamColor.WHITE) {
-                        _whiteTeamKingPos = posCheck;
                         kingPos.put(TeamColor.WHITE, posCheck);
                     } else {
                         kingPos.put(TeamColor.BLACK, posCheck);
