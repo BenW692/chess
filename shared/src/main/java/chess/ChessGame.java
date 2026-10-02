@@ -79,7 +79,7 @@ public class ChessGame {
         else {
             for (var move : potentialMoves) {
                 // the move never threatened check so it can be added
-                if (!doesMoveGetOutOfCheck(move)) {
+                if (doesMoveGetOutOfCheck(move)) {
                     validMoves.add(move);
                 }
             }
@@ -164,19 +164,19 @@ public class ChessGame {
                 else if (pieceCheck.getTeamColor() == teamColor) {
                     continue;
                 }
-                // the piece is the other eam
+                // the piece is the other team
                 else {
                     Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(tempBoard, posCheck);
                     for (var newMove : enemyMoves) {
                         // can the other team's piece attack our king?
-                        if (newMove.getEndPosition() == kingPos.get(teamColor)) {
-                            return canCaptureToEscape(posCheck, tempBoard, teamColor);
+                        if (newMove.getEndPosition().equals(kingPos.get(teamColor))) {
+                            return false;
                         }
                     }
                 }
             }
         }
-        return false;
+        return true;
     }
 
     public void makeTempMove(ChessMove move, ChessBoard tempBoard) {
@@ -230,7 +230,7 @@ public class ChessGame {
         for (int row = 1; row < 9; row ++) {
             for (int col = 1; col < 9; col++) {
                 ChessPosition posCheck = new ChessPosition(row, col);
-                ChessPiece pieceCheck = _gameBoard.getPiece(posCheck);
+                ChessPiece pieceCheck = board.getPiece(posCheck);
                 if (pieceCheck == null) {
                     continue;
                 }
