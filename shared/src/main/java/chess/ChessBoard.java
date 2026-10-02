@@ -13,7 +13,13 @@ import java.util.Objects;
 public class ChessBoard {
     private ChessPiece [][] _board;
 
-    public ChessBoard(ChessBoard other) {this._board = other._board;}
+    public ChessBoard(ChessBoard other) {
+        this._board = new ChessPiece[other._board.length][];
+        for (int row = 0; row < other._board.length; row ++)
+        {
+            this._board[row] = Arrays.copyOf(other._board[row], other._board[row].length);
+        }
+    }
 
     public ChessBoard() {
         _board = new ChessPiece[8][8];
@@ -36,9 +42,9 @@ public class ChessBoard {
     @Override
     public String toString() {
         String output = "";
-        for (var row  : _board)
+        for (int row = 7; row >= 0; row --)
         {
-            for (var item : row)
+            for (var item : _board[row])
             {
                 if (item == null)
                 {
@@ -47,7 +53,7 @@ public class ChessBoard {
                 else {
                     output += item.toString();
                 }
-                output += ", ";
+                output += "| ";
             }
             output += "\n";
         }
@@ -77,7 +83,27 @@ public class ChessBoard {
         int row = position.getRow();
         int col = position.getColumn();
         return _board[row-1][col-1];
-//        throw new RuntimeException("Not implemented");
+    }
+
+    public ChessPiece[][] getBoardArray()
+    {
+        return _board;
+    }
+
+    public void movePiece(ChessMove move) {
+        ChessPosition start_pos = move.getStartPosition();
+        ChessPosition end_pos = move.getEndPosition();
+        ChessPiece movingPiece = getPiece(start_pos);
+        removePiece(start_pos);
+        addPiece(end_pos, movingPiece);
+    }
+
+    public void removePiece(ChessPosition pos)
+    {
+        // todo: I cannot get original piece to be deleted
+        int row = pos.getRow();
+        int col = pos.getColumn();
+        this._board[row-1][col-1] = null;
     }
 
     /**
