@@ -226,33 +226,6 @@ public class ChessGame {
         throw new InvalidMoveException("The supplied move is not a valid move");
     }
 
-    public boolean canCaptureToEscape(ChessPosition posToCapture, ChessBoard board, TeamColor attackingTeamColor)
-    {
-        for (int row = 1; row < 9; row ++) {
-            for (int col = 1; col < 9; col++) {
-                ChessPosition posCheck = new ChessPosition(row, col);
-                ChessPiece pieceCheck = board.getPiece(posCheck);
-                if (pieceCheck == null) {
-                    continue;
-                }
-                // the piece is the other team's color
-                else if (pieceCheck.getTeamColor() != attackingTeamColor) {
-                    continue;
-                }
-                else {
-                    Collection<ChessMove> attackMoves = pieceCheck.pieceMoves(board, posCheck);
-                    for (var newMove : attackMoves) {
-                        // can this piece attack our king?
-                        if (newMove.getEndPosition().equals(posToCapture)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
 
     /**
      * Determines if the given team is in check
@@ -289,9 +262,6 @@ public class ChessGame {
         return false;
     }
 
-    public boolean isInCheck(TeamColor teamColor, ChessBoard tempBoard) {
-        return false;
-    }
 
     /**
      * Determines if the given team is in checkmate
