@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -11,18 +10,18 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private ChessPiece [][] _board;
+    private ChessPiece [][] board;
 
     public ChessBoard(ChessBoard other) {
-        this._board = new ChessPiece[other._board.length][];
-        for (int row = 0; row < other._board.length; row ++)
+        this.board = new ChessPiece[other.board.length][];
+        for (int row = 0; row < other.board.length; row ++)
         {
-            this._board[row] = Arrays.copyOf(other._board[row], other._board[row].length);
+            this.board[row] = Arrays.copyOf(other.board[row], other.board[row].length);
         }
     }
 
     public ChessBoard() {
-        _board = new ChessPiece[8][8];
+        board = new ChessPiece[8][8];
     }
 
     @Override
@@ -31,12 +30,12 @@ public class ChessBoard {
             return false;
         }
         ChessBoard that = (ChessBoard) o;
-        return Objects.deepEquals(_board, that._board);
+        return Objects.deepEquals(board, that.board);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(_board);
+        return Arrays.deepHashCode(board);
     }
 
     @Override
@@ -45,7 +44,7 @@ public class ChessBoard {
         for (int row = 7; row >= 0; row --)
         {
             output += "|";
-            for (var item : _board[row])
+            for (var item : board[row])
             {
                 if (item == null)
                 {
@@ -70,7 +69,7 @@ public class ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) {
         int row = position.getRow();
         int col = position.getColumn();
-        _board[row-1][col-1] = piece;
+        board[row-1][col-1] = piece;
     }
 
     /**
@@ -83,12 +82,12 @@ public class ChessBoard {
     public ChessPiece getPiece(ChessPosition position) {
         int row = position.getRow();
         int col = position.getColumn();
-        return _board[row-1][col-1];
+        return board[row-1][col-1];
     }
 
     public ChessPiece[][] getBoardArray()
     {
-        return _board;
+        return board;
     }
 
     public void movePiece(ChessMove move) {
@@ -104,7 +103,7 @@ public class ChessBoard {
         // todo: I cannot get original piece to be deleted
         int row = pos.getRow();
         int col = pos.getColumn();
-        this._board[row-1][col-1] = null;
+        this.board[row-1][col-1] = null;
     }
 
     /**
@@ -134,7 +133,7 @@ public class ChessBoard {
                 }
                 case '|' -> {}
                 case ' ' -> {
-                    _board[row-1][col-1] = null;
+                    board[row-1][col-1] = null;
                     col ++;
                 }
                 default -> {
@@ -149,15 +148,5 @@ public class ChessBoard {
 
             }
         }
-    }
-
-    public boolean isOutofBounds(ChessPosition pos)
-    {
-        int row = pos.getRow();
-        int col = pos.getColumn();
-        if (row > 8 || row < 1) {return true;}
-        if (col > 8 || col < 1) {return true;}
-        // else both the row and col are in the bounds of the board
-        return false;
     }
 }

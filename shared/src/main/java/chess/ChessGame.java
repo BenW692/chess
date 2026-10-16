@@ -9,12 +9,12 @@ import java.util.*;
  * signature of the existing methods.
  */
 public class ChessGame {
-    private TeamColor _currTeamTurn = TeamColor.WHITE;
-    private ChessBoard _gameBoard;
+    private TeamColor currTeamTurn = TeamColor.WHITE;
+    private ChessBoard gameBoard;
 
     public ChessGame() {
-        _gameBoard = new ChessBoard();
-        _gameBoard.resetBoard();
+        gameBoard = new ChessBoard();
+        gameBoard.resetBoard();
     }
 
     @Override
@@ -23,19 +23,19 @@ public class ChessGame {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
-        return _currTeamTurn == chessGame._currTeamTurn && Objects.equals(_gameBoard, chessGame._gameBoard);
+        return currTeamTurn == chessGame.currTeamTurn && Objects.equals(gameBoard, chessGame.gameBoard);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_currTeamTurn, _gameBoard);
+        return Objects.hash(currTeamTurn, gameBoard);
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        return _currTeamTurn;
+        return currTeamTurn;
     }
 
     /**
@@ -44,7 +44,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        _currTeamTurn = team;
+        currTeamTurn = team;
     }
 
     /**
@@ -65,10 +65,10 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         Collection<ChessMove> validMoves = new ArrayList<>();
         Collection<ChessMove> potentialMoves = new ArrayList<>();
-        ChessPiece piece = _gameBoard.getPiece(startPosition);
+        ChessPiece piece = gameBoard.getPiece(startPosition);
         if (piece == null) {return null;}
         else {
-            potentialMoves = piece.pieceMoves(_gameBoard, startPosition);
+            potentialMoves = piece.pieceMoves(gameBoard, startPosition);
         }
         if (!isInCheck(piece.getTeamColor())) {
             for (var move : potentialMoves) {
@@ -116,9 +116,9 @@ public class ChessGame {
     public boolean doesMoveCauseOwnCheck(ChessMove move)
     {
         //make sure the move won't put us in check
-        TeamColor teamColor = _gameBoard.getPiece(move.getStartPosition()).getTeamColor();
+        TeamColor teamColor = gameBoard.getPiece(move.getStartPosition()).getTeamColor();
         // make a temp board where that move is completed. Is team in check with that move?
-        ChessBoard tempBoard = new ChessBoard(_gameBoard);
+        ChessBoard tempBoard = new ChessBoard(gameBoard);
         makeTempMove(move, tempBoard);
         Map<TeamColor, ChessPosition> kingPos = updateKingPos(tempBoard);
         // for loop over pieceMoves for all opposing pieces. If one of those moves is the team's king, break
@@ -148,9 +148,9 @@ public class ChessGame {
 
 
     public boolean doesMoveGetOutOfCheck(ChessMove move) {
-        TeamColor teamColor = _gameBoard.getPiece(move.getStartPosition()).getTeamColor();
+        TeamColor teamColor = gameBoard.getPiece(move.getStartPosition()).getTeamColor();
         // make a temp board where that move is completed
-        ChessBoard tempBoard = new ChessBoard(_gameBoard);
+        ChessBoard tempBoard = new ChessBoard(gameBoard);
         makeTempMove(move, tempBoard);
         Map<TeamColor, ChessPosition> kingPos = updateKingPos(tempBoard);
         for (int row = 1; row < 9; row ++) {
@@ -200,25 +200,25 @@ public class ChessGame {
         // if the move would place king in check it needs to throw invalidmoveexception
         ChessPosition start_pos = move.getStartPosition();
         ChessPosition target_pos = move.getEndPosition();
-        ChessPiece target_piece = _gameBoard.getPiece(target_pos);
-        ChessPiece movingPiece = _gameBoard.getPiece(start_pos);
+        ChessPiece target_piece = gameBoard.getPiece(target_pos);
+        ChessPiece movingPiece = gameBoard.getPiece(start_pos);
         // todo: do I need to keep track of what pieces got captured?
         if (movingPiece == null) {
             throw new InvalidMoveException("There is no piece at the supplied starting position.");
         }
-        else if (movingPiece.getTeamColor() != _currTeamTurn) {
+        else if (movingPiece.getTeamColor() != currTeamTurn) {
             throw new InvalidMoveException("That piece cannot be moved because it is the other team's turn");
         }
         Collection<ChessMove> vMoves = validMoves(start_pos);
         for (var vMove : vMoves) {
             if (move.equals(vMove)) {
-                _gameBoard.movePiece(move);
+                gameBoard.movePiece(move);
                 if (move.getPromotionPiece() != null)
                 {
                     movingPiece.promotePiece(move.getPromotionPiece());
                 }
                 // update team turns
-                if (_currTeamTurn == TeamColor.WHITE) {setTeamTurn(TeamColor.BLACK);}
+                if (currTeamTurn == TeamColor.WHITE) {setTeamTurn(TeamColor.BLACK);}
                 else {setTeamTurn(TeamColor.WHITE);}
                 return;
             }
@@ -234,12 +234,12 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        Map<TeamColor, ChessPosition> kingPos = updateKingPos(_gameBoard);
+        Map<TeamColor, ChessPosition> kingPos = updateKingPos(gameBoard);
         // for loop over pieceMoves for all pieces. If one of those moves is the other team's king, break
         for (int row = 1; row < 9; row ++) {
             for (int col = 1; col < 9; col++) {
                 ChessPosition posCheck = new ChessPosition(row, col);
-                ChessPiece pieceCheck = _gameBoard.getPiece(posCheck);
+                ChessPiece pieceCheck = gameBoard.getPiece(posCheck);
                 if (pieceCheck == null) {
                     continue;
                 }
@@ -249,7 +249,7 @@ public class ChessGame {
                 }
                 // the piece is the other team
                 else {
-                    Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(_gameBoard, posCheck);
+                    Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(gameBoard, posCheck);
                     for (var newMove : enemyMoves) {
                         // can this piece attack our king?
                         if (newMove.getEndPosition().equals(kingPos.get(teamColor))) {
@@ -276,7 +276,7 @@ public class ChessGame {
             for (int row = 1; row < 9; row++) {
                 for (int col = 1; col < 9; col++) {
                     ChessPosition posCheck = new ChessPosition(row, col);
-                    ChessPiece pieceCheck = _gameBoard.getPiece(posCheck);
+                    ChessPiece pieceCheck = gameBoard.getPiece(posCheck);
                     if (pieceCheck == null) {continue;}
                     // the piece is the other team, so it doesn't help us get out of check
                     else if (pieceCheck.getTeamColor() != teamColor) {
@@ -307,7 +307,7 @@ public class ChessGame {
             for (int row = 1; row < 9; row++) {
                 for (int col = 1; col < 9; col++) {
                     ChessPosition posCheck = new ChessPosition(row, col);
-                    ChessPiece pieceCheck = _gameBoard.getPiece(posCheck);
+                    ChessPiece pieceCheck = gameBoard.getPiece(posCheck);
                     if (pieceCheck == null) {continue;}
                     // the piece is the other team, so it doesn't help us get out of check
                     else if (pieceCheck.getTeamColor() != teamColor) {
@@ -329,12 +329,13 @@ public class ChessGame {
      *
      * @param board the new board to use
      */
-    public void setBoard(ChessBoard board) {_gameBoard = board;}
+    public void setBoard(ChessBoard board) {
+        gameBoard = board;}
 
     /**
      * Gets the current chessboard
      *
      * @return the chessboard
      */
-    public ChessBoard getBoard() {return _gameBoard;}
+    public ChessBoard getBoard() {return gameBoard;}
 }

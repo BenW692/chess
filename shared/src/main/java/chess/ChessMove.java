@@ -1,6 +1,5 @@
 package chess;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -10,21 +9,21 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessMove {
-    private ChessPosition _start_pos;
-    private ChessPosition _end_pos;
-    private ChessPiece.PieceType _promotion_piece;
+    private ChessPosition startPos;
+    private ChessPosition endPos;
+    private ChessPiece.PieceType promotionPiece;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition) {
-        _start_pos = startPosition;
-        _end_pos = endPosition;
-        _promotion_piece = null;
+        startPos = startPosition;
+        endPos = endPosition;
+        promotionPiece = null;
     }
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
-        _start_pos = startPosition;
-        _end_pos = endPosition;
-        _promotion_piece = promotionPiece;
+        startPos = startPosition;
+        endPos = endPosition;
+        this.promotionPiece = promotionPiece;
     }
 
     @Override
@@ -33,23 +32,23 @@ public class ChessMove {
             return false;
         }
         ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(_start_pos, chessMove._start_pos) && Objects.equals(_end_pos, chessMove._end_pos) && _promotion_piece == chessMove._promotion_piece;
+        return Objects.equals(startPos, chessMove.startPos) && Objects.equals(endPos, chessMove.endPos) && promotionPiece == chessMove.promotionPiece;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_start_pos, _end_pos, _promotion_piece);
+        return Objects.hash(startPos, endPos, promotionPiece);
     }
 
     @Override
     public String toString() {
         String output_str = "(";
-        if (_promotion_piece == null) {
-            output_str += _start_pos +"->" + _end_pos;
+        if (promotionPiece == null) {
+            output_str += startPos +"->" + endPos;
         }
         else {
-            output_str += _start_pos +"->" + _end_pos +
-                    " P:" + ChessPiece.PIECE_TYPE_CHARACTER_MAP.get(_promotion_piece);
+            output_str += startPos +"->" + endPos +
+                    " P:" + ChessPiece.PIECE_TYPE_CHARACTER_MAP.get(promotionPiece);
         }
         output_str += ")";
         return output_str;
@@ -58,12 +57,12 @@ public class ChessMove {
     /**
      * @return ChessPosition of starting location
      */
-    public ChessPosition getStartPosition() {return _start_pos;}
+    public ChessPosition getStartPosition() {return startPos;}
 
     /**
      * @return ChessPosition of ending location
      */
-    public ChessPosition getEndPosition() {return _end_pos;}
+    public ChessPosition getEndPosition() {return endPos;}
 
     /**
      * Gets the type of piece to promote a pawn to if pawn promotion is part of this
@@ -71,6 +70,6 @@ public class ChessMove {
      *
      * @return Type of piece to promote a pawn to, or null if no promotion
      */
-    public ChessPiece.PieceType getPromotionPiece() {return _promotion_piece;}
+    public ChessPiece.PieceType getPromotionPiece() {return promotionPiece;}
 
 }

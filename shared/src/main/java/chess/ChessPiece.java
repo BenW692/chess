@@ -9,12 +9,12 @@ import java.util.*;
  * signature of the existing methods.
  */
 public class ChessPiece {
-    ChessGame.TeamColor _color;
-    ChessPiece.PieceType _type;
+    ChessGame.TeamColor color;
+    ChessPiece.PieceType type;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-        _color = pieceColor;
-        _type = type;
+        color = pieceColor;
+        this.type = type;
     }
 
     @Override
@@ -23,22 +23,22 @@ public class ChessPiece {
             return false;
         }
         ChessPiece that = (ChessPiece) o;
-        return _color == that._color && _type == that._type;
+        return color == that.color && type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_color, _type);
+        return Objects.hash(color, type);
     }
 
     @Override
     public String toString() {
         String output;
         // prepend char with color
-        if (_color == ChessGame.TeamColor.WHITE) {output = "W";}
+        if (color == ChessGame.TeamColor.WHITE) {output = "W";}
         else {output = "B";}
         // put char for type after color
-        output += PIECE_TYPE_CHARACTER_MAP.get(_type);
+        output += PIECE_TYPE_CHARACTER_MAP.get(type);
         return output;
     }
 
@@ -72,14 +72,15 @@ public class ChessPiece {
     /**
      * @return Which team this chess piece belongs to
      */
-    public ChessGame.TeamColor getTeamColor() {return _color;}
+    public ChessGame.TeamColor getTeamColor() {return color;}
 
     /**
      * @return which type of chess piece this piece is
      */
-    public PieceType getPieceType() {return _type;}
+    public PieceType getPieceType() {return type;}
 
-    public void promotePiece(PieceType type) {_type = type;}
+    public void promotePiece(PieceType type) {
+        this.type = type;}
 
     /**
      * Calculates all the positions a chess piece can move to
@@ -90,9 +91,9 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
-        ChessGame.TeamColor color = _color;
+        ChessGame.TeamColor color = this.color;
         PieceMoveOptions pieceMoveOptions = new PieceMoveOptions();
-        switch (_type)
+        switch (type)
         {
             case KING -> {
                 moves = pieceMoveOptions.kingPieceMoves(board, myPosition, color);
