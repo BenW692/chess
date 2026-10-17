@@ -1,5 +1,6 @@
 package handler;
 import com.google.gson.Gson;
+import dataaccess.AlreadyTakenException;
 import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
 import dataaccess.SessionDAO;
@@ -8,6 +9,8 @@ import io.javalin.http.Handler;
 import model.AuthData;
 import model.RegisterRequest;
 import service.UserService;
+
+import java.util.Map;
 
 public class RegisterHandler implements Handler{
     private SessionDAO sessionDAO;
@@ -22,15 +25,26 @@ public class RegisterHandler implements Handler{
             request = new Gson().fromJson(body, RegisterRequest.class);
         }
         catch (Exception e) {
-//            ctx.status(500).result("Error: Bad Request");
             throw new DataAccessException("Miscellaneous error ", e);
         }
         if (request.username() == null || request.password() == null || request.email() == null){
-            throw new BadRequestException("Http register request did not have sufficient data in the body.");
+            var body = new Gson().toJson(Map.of("message", "Error: bad request"));
+            ctx.status(400);
+            ctx.json(body);
+            return;
         }
         // this is where I would call the service
         UserService userService = new UserService(sessionDAO);
-        AuthData authData = userService.register(request);
-        ctx.status(200).result(new Gson().toJson(authData));
+        try {
+            AuthData authData = userService.register(request);
+            ctx.status(200).json(new Gson().toJson(authData));
+        }
+        catch (AlreadyTakenException e)
+        {
+            var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
+            ctx.status(403);
+            ctx.json(body);
+        }
+
     }
 }

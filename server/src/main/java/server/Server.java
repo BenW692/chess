@@ -2,19 +2,29 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.LocalSessionDAO;
-import handler.RegisterHandler;
+import dataaccess.SessionDAO;
+import handler.*;
 import io.javalin.*;
 import io.javalin.http.Context;
+import model.CreateGameResult;
+import model.ListGameRequest;
 
 import java.util.Map;
 
 public class Server {
-    // todo: instantiate everything here at the beginning and pass it all through
-    public LocalSessionDAO userDAO = new LocalSessionDAO();
-    final RegisterHandler regHandler = new RegisterHandler(userDAO);
+    public SessionDAO sessionDAO;
     private final Javalin javalin;
 
-    public Server() {
+    public Server ()
+    {
+        this.sessionDAO = new LocalSessionDAO();
+        final RegisterHandler regHandler = new RegisterHandler(sessionDAO);
+        final ClearAppHandler clearAppHandler = new ClearAppHandler(sessionDAO);
+        final LoginHandler loginHandler = new LoginHandler(sessionDAO);
+        final LogoutHandler logoutHandler = new LogoutHandler(sessionDAO);
+        final ListGamesHandler listGamesHandler = new ListGamesHandler(sessionDAO);
+        final CreateGameHandler createGameHandler = new CreateGameHandler(sessionDAO);
+        final JoinGameHandler joinGameHandler = new JoinGameHandler(sessionDAO);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         // Register your endpoints and exception handlers here.
         javalin.post("/user", regHandler);
@@ -25,18 +35,15 @@ public class Server {
         javalin.post("/game", createGameHandler);
         javalin.put("/game", joinGameHandler);
         javalin.exception(Exception.class, this::exceptionHandler);
-
     }
 
-
     private void exceptionHandler(Exception e, Context context) {
-        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage()), "success", false));
+        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         context.status(500);
         context.json(body);
     }
 
     public int run(int desiredPort) {
-        // TODO: for phase 3, I need to instantiate all DAOs here in the server and pass them down through
         javalin.start(desiredPort);
         return javalin.port();
     }

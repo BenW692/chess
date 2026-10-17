@@ -18,7 +18,7 @@ public class UserService {
         UserData user = sessionDao.getUser(req.username());
         if (user != null)
         {
-            throw new AlreadyTakenException("The user already exists in the database");
+            throw new AlreadyTakenException("username already taken");
         }
         UserData newUserData = new UserData(req.username(), req.password(), req.email());
         sessionDao.createUser(newUserData);
