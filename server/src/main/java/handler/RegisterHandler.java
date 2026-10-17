@@ -8,6 +8,7 @@ import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import model.AuthData;
 import model.RegisterRequest;
+import model.RegisterResult;
 import service.UserService;
 
 import java.util.Map;
@@ -18,32 +19,31 @@ public class RegisterHandler implements Handler{
         this.sessionDAO = sessionDAO;
     }
     @Override
-    public void handle(Context ctx) throws DataAccessException {
-        RegisterRequest request = null;
+    public void handle(Context context) throws DataAccessException {
+        RegisterRequest registerRequest = null;
         try {
-            var body = ctx.body();
-            request = new Gson().fromJson(body, RegisterRequest.class);
+            var body = context.body();
+            registerRequest = new Gson().fromJson(body, RegisterRequest.class);
         }
         catch (Exception e) {
             throw new DataAccessException("Miscellaneous error ", e);
         }
-        if (request.username() == null || request.password() == null || request.email() == null){
+        if (registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null){
             var body = new Gson().toJson(Map.of("message", "Error: bad request"));
-            ctx.status(400);
-            ctx.json(body);
+            context.status(400);
+            context.json(body);
             return;
         }
-        // this is where I would call the service
         UserService userService = new UserService(sessionDAO);
         try {
-            AuthData authData = userService.register(request);
-            ctx.status(200).json(new Gson().toJson(authData));
+            RegisterResult registerResult = userService.register(registerRequest);
+            context.status(200).json(new Gson().toJson(registerResult));
         }
         catch (AlreadyTakenException e)
         {
             var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
-            ctx.status(403);
-            ctx.json(body);
+            context.status(403);
+            context.json(body);
         }
 
     }
