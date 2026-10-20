@@ -60,4 +60,10 @@ public class LocalSessionDAO implements SessionDAO {
     public boolean updateGame() {
         return false;
     }
+
+    public void clearApp() {
+        gameMap.clear();
+        authTokens.clear();
+        userMap.clear();
+    }
 }

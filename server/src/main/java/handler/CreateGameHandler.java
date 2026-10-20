@@ -26,19 +26,18 @@ public class CreateGameHandler implements Handler {
         try {
             String header = context.header("authorization");
             String body = context.body();
+            if (!body.contains("gameName")){
+                var err = new Gson().toJson(Map.of("message", "Error: bad request"));
+                context.status(400);
+                context.json(err);
+                return;
+            }
             com.google.gson.JsonObject json = new Gson().fromJson(body, JsonObject.class);
             String gameName = json.get("gameName").getAsString();
             createGameRequest = new CreateGameRequest(header, gameName);
-
         }
         catch (Exception e) {
             throw new DataAccessException("Miscellaneous error ", e);
-        }
-        if (createGameRequest.gameName() == null || createGameRequest.authToken() == null){
-            var body = new Gson().toJson(Map.of("message", "Error: bad request"));
-            context.status(500);
-            context.json(body);
-            return;
         }
         UserService userService = new UserService(sessionDAO);
         GameService gameService = new GameService(sessionDAO);

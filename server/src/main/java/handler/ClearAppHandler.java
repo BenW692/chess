@@ -1,5 +1,6 @@
 package handler;
 
+import dataaccess.DataAccessException;
 import dataaccess.SessionDAO;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
@@ -11,6 +12,12 @@ public class ClearAppHandler implements Handler {
 
     @Override
     public void handle(@NotNull Context context) throws Exception {
-
+        try {
+            sessionDAO.clearApp();
+            context.status(200);
+        }
+        catch (Exception e) {
+            throw new DataAccessException("Miscellaneous error ", e);
+        }
     }
 }

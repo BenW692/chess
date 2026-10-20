@@ -16,4 +16,5 @@ public interface SessionDAO {
     GameData getGame(int gameID);
     Collection<GameData> listGames();
     boolean updateGame();
+    void clearApp();
 }
