@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -8,8 +9,8 @@ import java.util.*;
 
 public class LocalSessionDAO implements SessionDAO {
     Map<String, UserData> userMap = new HashMap<>(); //username, UserData
-    Collection<String> authTokens = new ArrayList<>();
-    Map<Integer, GameData> gameMap = Map.of(); //gameID, gameData
+    Map<String, AuthData> authTokens = new HashMap<>();
+    Map<Integer, GameData> gameMap = new HashMap<>(); //gameID, gameData
 
     @Override
     public void createUser(UserData userData) {
@@ -23,27 +24,31 @@ public class LocalSessionDAO implements SessionDAO {
 
     @Override
     public void createAuth(AuthData authData) {
-        authTokens.add(authData.authToken());
+        authTokens.put(authData.authToken(), authData);
     }
 
     @Override
-    public AuthData getAuth() {
-        return null;
+    public AuthData getAuth(String authToken) {
+        return authTokens.getOrDefault(authToken, null);
     }
 
     @Override
-    public boolean deleteAuth() {
-        return false;
+    public void deleteAuth(String authToken) {
+        authTokens.remove(authToken);
     }
 
     @Override
-    public boolean createGame() {
-        return false;
+    public int createGame(String gameName) {
+        int gameID = new Random().nextInt(9000) + 1000;
+        ChessGame chessGame = new ChessGame();
+        GameData gameData = new GameData(gameID, null, null, gameName, chessGame);
+        gameMap.put(gameID, gameData);
+        return gameID;
     }
 
     @Override
-    public GameData getGame() {
-        return null;
+    public GameData getGame(int gameID) {
+        return gameMap.getOrDefault(gameID, null);
     }
 
     @Override

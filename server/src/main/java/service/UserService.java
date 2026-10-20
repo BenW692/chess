@@ -13,7 +13,6 @@ public class UserService {
     }
 
     public void validatePassword() {}
-    public void authenticateUser() {}
 
     public RegisterResult register(RegisterRequest req) throws AlreadyTakenException {
         UserData user = sessionDao.getUser(req.username());
@@ -49,7 +48,20 @@ public class UserService {
         return new LoginResult(newAuthData.username(), newAuthData.authToken());
     }
 
+    public void logout(LogoutRequest req) throws UnauthorizedException {
+        authenticateUser(req.authToken());
+        sessionDao.deleteAuth(req.authToken());
+    }
+
     public static String generateToken() {
         return UUID.randomUUID().toString();
+    }
+
+    public void authenticateUser(String authToken) {
+        AuthData authData = sessionDao.getAuth(authToken);
+        if (authData == null)
+        {
+            throw new UnauthorizedException("unauthorized. This user is not logged in.");
+        }
     }
 }
