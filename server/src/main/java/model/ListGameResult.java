@@ -1,4 +1,6 @@
 package model;
 
-public record ListGameResult() {
+import java.util.Collection;
+
+public record ListGameResult(Collection<GameData> games) {
 }

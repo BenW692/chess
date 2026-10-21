@@ -38,6 +38,7 @@ public class Server {
     }
 
     private void exceptionHandler(Exception e, Context context) {
+        // todo: Put unauthorized error catch in this funciton to avoid duplicate code blocks
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         context.status(500);
         context.json(body);

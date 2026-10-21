@@ -53,7 +53,7 @@ public class LocalSessionDAO implements SessionDAO {
 
     @Override
     public Collection<GameData> listGames() {
-        return List.of();
+        return gameMap.values();
     }
 
     @Override

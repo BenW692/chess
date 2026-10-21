@@ -5,6 +5,7 @@ import model.GameData;
 import model.UserData;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface SessionDAO {
     void createUser(UserData userData); // this will probably throw an exception if we find a user when we try to create

@@ -1,9 +1,9 @@
 package service;
 
 import dataaccess.SessionDAO;
-import model.CreateGameRequest;
-import model.CreateGameResult;
-import model.GameData;
+import model.*;
+
+import java.util.Collection;
 
 public class GameService {
     private SessionDAO sessionDAO;
@@ -22,5 +22,8 @@ public class GameService {
 
     public void checkGameAvailability() {};
 
-    public void getGames() {}
+    public ListGameResult listGames(ListGameRequest listGameRequest) {
+        Collection<GameData> games = sessionDAO.listGames();
+        return new ListGameResult(games);
+    }
 }
