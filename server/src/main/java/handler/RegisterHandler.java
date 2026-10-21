@@ -35,16 +35,8 @@ public class RegisterHandler implements Handler{
             return;
         }
         UserService userService = new UserService(sessionDAO);
-        try {
-            RegisterResult registerResult = userService.register(registerRequest);
-            context.status(200).json(new Gson().toJson(registerResult));
-        }
-        catch (AlreadyTakenException e)
-        {
-            var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
-            context.status(403);
-            context.json(body);
-        }
+        RegisterResult registerResult = userService.register(registerRequest);
+        context.status(200).json(new Gson().toJson(registerResult));
 
     }
 }

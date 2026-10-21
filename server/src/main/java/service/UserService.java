@@ -11,8 +11,6 @@ public class UserService {
         sessionDao = sessionDAO;
     }
 
-    public void validatePassword() {}
-
     public RegisterResult register(RegisterRequest req) throws AlreadyTakenException {
         UserData user = sessionDao.getUserWUsername(req.username());
         if (user != null)

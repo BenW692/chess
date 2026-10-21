@@ -51,11 +51,5 @@ public class JoinGameHandler implements Handler {
             context.status(400);
             context.json(body);
         }
-        catch (AlreadyTakenException e)
-        {
-            var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
-            context.status(403);
-            context.json(body);
-        }
     }
 }

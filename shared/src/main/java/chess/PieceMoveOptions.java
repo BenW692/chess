@@ -9,10 +9,10 @@ public class PieceMoveOptions {
 
     public Collection<ChessMove> kingPieceMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor col) {
         Collection<ChessMove> moves = new ArrayList<>();
-        int start_row = myPosition.getRow();
-        int start_col = myPosition.getColumn();
+        int startRow = myPosition.getRow();
+        int startCol = myPosition.getColumn();
         ChessGame.TeamColor color = col;
-        List<List<Integer>> move_masks= List.of(
+        List<List<Integer>> moveMasks= List.of(
                 List.of(0, 1),
                 List.of(1, 0),
                 List.of(0, -1),
@@ -22,16 +22,18 @@ public class PieceMoveOptions {
                 List.of(-1, -1),
                 List.of(-1, 1)
         );
-        return linearMoveMask(board, myPosition, move_masks, start_row, start_col, color, moves);
+        return linearMoveMask(board, myPosition, moveMasks, startRow, startCol, color, moves);
     }
 
-    private Collection<ChessMove> linearMoveMask(ChessBoard board, ChessPosition myPosition, List<List<Integer>> move_masks, int start_row, int start_col, ChessGame.TeamColor color, Collection<ChessMove> moves) {
-        for (var mask : move_masks)
+    private Collection<ChessMove> linearMoveMask(ChessBoard board, ChessPosition myPosition,
+                                                 List<List<Integer>> moveMasks, int startRow, int startCol,
+                                                 ChessGame.TeamColor color, Collection<ChessMove> moves) {
+        for (var mask : moveMasks)
         {
             int row_adj = mask.getFirst();
             int col_adj = mask.getLast();
-            int new_row = start_row + row_adj;
-            int new_col = start_col + col_adj;
+            int new_row = startRow + row_adj;
+            int new_col = startCol + col_adj;
             ChessPosition newPos = new ChessPosition(new_row, new_col);
             if (isMoveValid(board, newPos, color)) {
                 ChessMove newMove = new ChessMove(myPosition, newPos);
@@ -43,10 +45,10 @@ public class PieceMoveOptions {
 
     public Collection<ChessMove> knightPieceMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor col) {
         Collection<ChessMove> moves = new ArrayList<>();
-        int start_row = myPosition.getRow();
-        int start_col = myPosition.getColumn();
+        int startRow = myPosition.getRow();
+        int startCol = myPosition.getColumn();
         ChessGame.TeamColor color = col;
-        List<List<Integer>> move_masks= List.of(
+        List<List<Integer>> moveMasks= List.of(
                 List.of(2, 1),
                 List.of(2, -1),
                 List.of(-2, 1),
@@ -56,45 +58,47 @@ public class PieceMoveOptions {
                 List.of(1, -2),
                 List.of(-1, -2)
         );
-        return linearMoveMask(board, myPosition, move_masks, start_row, start_col, color, moves);
+        return linearMoveMask(board, myPosition, moveMasks, startRow, startCol, color, moves);
     }
 
     public Collection<ChessMove> rookPieceMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor col) {
         Collection<ChessMove> moves = new ArrayList<>();
-        int start_row = myPosition.getRow();
-        int start_col = myPosition.getColumn();
+        int startRow = myPosition.getRow();
+        int startCol = myPosition.getColumn();
         ChessGame.TeamColor color = col;
-        List<List<Integer>> move_masks= List.of(
+        List<List<Integer>> moveMasks= List.of(
                 List.of(0, 1),
                 List.of(0, -1),
                 List.of(1, 0),
                 List.of(-1, 0)
         );
-        return multiplierMoveMask(board, myPosition, move_masks, start_row, start_col, color, moves);
+        return multiplierMoveMask(board, myPosition, moveMasks, startRow, startCol, color, moves);
     }
 
     public Collection<ChessMove> bishopPieceMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor col) {
         Collection<ChessMove> moves = new ArrayList<>();
-        int start_row = myPosition.getRow();
-        int start_col = myPosition.getColumn();
+        int startRow = myPosition.getRow();
+        int startCol = myPosition.getColumn();
         ChessGame.TeamColor color = col;
-        List<List<Integer>> move_masks= List.of(
+        List<List<Integer>> moveMasks= List.of(
                 List.of(1, 1),
                 List.of(1, -1),
                 List.of(-1, 1),
                 List.of(-1, -1)
         );
-        return multiplierMoveMask(board, myPosition, move_masks, start_row, start_col, color, moves);
+        return multiplierMoveMask(board, myPosition, moveMasks, startRow, startCol, color, moves);
     }
 
-    private Collection<ChessMove> multiplierMoveMask(ChessBoard board, ChessPosition myPosition, List<List<Integer>> move_masks, int start_row, int start_col, ChessGame.TeamColor color, Collection<ChessMove> moves) {
-        for (var mask : move_masks)
+    private Collection<ChessMove> multiplierMoveMask(ChessBoard board, ChessPosition myPosition,
+                                                     List<List<Integer>> moveMasks, int startRow, int startCol,
+                                                     ChessGame.TeamColor color, Collection<ChessMove> moves) {
+        for (var mask : moveMasks)
         {
             int row_adj = mask.getFirst();
             int col_adj = mask.getLast();
             for (int mult = 1; mult < 8; mult ++) {
-                int new_row = start_row + row_adj * mult;
-                int new_col = start_col + col_adj * mult;
+                int new_row = startRow + row_adj * mult;
+                int new_col = startCol + col_adj * mult;
                 ChessPosition newPos = new ChessPosition(new_row, new_col);
                 if (isMoveValid(board, newPos, color)) {
                     ChessMove newMove = new ChessMove(myPosition, newPos);
@@ -118,70 +122,43 @@ public class PieceMoveOptions {
     }
 
     public Collection<ChessMove> pawnPieceMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor col) {
-        Collection<ChessMove> moves = new ArrayList<>();
-        int start_row = myPosition.getRow();
-        int start_col = myPosition.getColumn();
-        ChessGame.TeamColor color = col;
+        int sign_multiplier;
         if (col == ChessGame.TeamColor.BLACK)
         {
-            // first move
-            if (start_row == 7) {
-                int close_row = start_row - 1;
-                ChessPosition closePos = new ChessPosition(close_row, start_col);
-                int new_row = start_row - 2;
-                ChessPosition newPos = new ChessPosition(new_row, start_col);
-                if (board.getPiece(newPos) == null && board.getPiece(closePos) == null) {
-                    ChessMove newMove = new ChessMove(myPosition, newPos);
-                    moves.add(newMove);
-                }
-                moves.addAll(pawnValidMoves(board, myPosition, color));
+            sign_multiplier = -1;
+        }
+        else {sign_multiplier = 1;}
+        Collection<ChessMove> moves = new ArrayList<>();
+        int startRow = myPosition.getRow();
+        int startCol = myPosition.getColumn();
+        if ((startRow == 2 && col == ChessGame.TeamColor.WHITE) ||
+                (col == ChessGame.TeamColor.BLACK && startRow == 7)) {
+            int close_row = startRow + 1 * sign_multiplier;
+            ChessPosition closePos = new ChessPosition(close_row, startCol);
+            int new_row = startRow + 2 * sign_multiplier;
+            ChessPosition newPos = new ChessPosition(new_row, startCol);
+            if (board.getPiece(newPos) == null && board.getPiece(closePos) == null) {
+                ChessMove newMove = new ChessMove(myPosition, newPos);
+                moves.add(newMove);
             }
-            //promotion
-            else if (start_row == 2) {
-                Collection<ChessMove> normMoves = pawnValidMoves(board, myPosition, color);
-                for (var move : normMoves)
-                {
-                    ChessPosition endPosition = move.getEndPosition();
-                    moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.ROOK));
-                    moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.BISHOP));
-                    moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT));
-                    moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN));
-                }
-            }
-            //normal
-            else {
-                moves = pawnValidMoves(board, myPosition, color);
+            moves.addAll(pawnValidMoves(board, myPosition, col));
+        }
+        //promotion
+        else if ((startRow == 7 && col == ChessGame.TeamColor.WHITE) ||
+                (col == ChessGame.TeamColor.BLACK && startRow == 2)) {
+            Collection<ChessMove> normMoves = pawnValidMoves(board, myPosition, col);
+            for (var move : normMoves)
+            {
+                ChessPosition endPosition = move.getEndPosition();
+                moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.ROOK));
+                moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.BISHOP));
+                moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT));
+                moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN));
             }
         }
+        //normal
         else {
-            // first move
-            if (start_row == 2) {
-                int close_row = start_row + 1;
-                ChessPosition closePos = new ChessPosition(close_row, start_col);
-                int new_row = start_row + 2;
-                ChessPosition newPos = new ChessPosition(new_row, start_col);
-                if (board.getPiece(newPos) == null && board.getPiece(closePos) == null) {
-                    ChessMove newMove = new ChessMove(myPosition, newPos);
-                    moves.add(newMove);
-                }
-                moves.addAll(pawnValidMoves(board, myPosition, color));
-            }
-            //promotion
-            else if (start_row == 7) {
-                Collection<ChessMove> normMoves = pawnValidMoves(board, myPosition, color);
-                for (var move : normMoves)
-                {
-                    ChessPosition endPosition = move.getEndPosition();
-                    moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.ROOK));
-                    moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.BISHOP));
-                    moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT));
-                    moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN));
-                }
-            }
-            //normal
-            else {
-                moves = pawnValidMoves(board, myPosition, color);
-            }
+            moves = pawnValidMoves(board, myPosition, col);
         }
         return moves;
     }
@@ -219,11 +196,11 @@ public class PieceMoveOptions {
         Collection<ChessPosition> attackPositions = new ArrayList<>();
         Collection<ChessMove> moves = new ArrayList<>();
 
-        int start_row = myPosition.getRow();
-        int start_col = myPosition.getColumn();
-        ChessPosition forward = new ChessPosition(start_row + sign_multiplier, start_col);
-        ChessPosition left_attack = new ChessPosition(start_row + sign_multiplier, start_col - 1);
-        ChessPosition right_attack = new ChessPosition(start_row + sign_multiplier, start_col + 1);
+        int startRow = myPosition.getRow();
+        int startCol = myPosition.getColumn();
+        ChessPosition forward = new ChessPosition(startRow + sign_multiplier, startCol);
+        ChessPosition left_attack = new ChessPosition(startRow + sign_multiplier, startCol - 1);
+        ChessPosition right_attack = new ChessPosition(startRow + sign_multiplier, startCol + 1);
 
         attackPositions.add(left_attack);
         attackPositions.add(right_attack);

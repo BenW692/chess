@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.AlreadyTakenException;
 import dataaccess.LocalSessionDAO;
 import dataaccess.SessionDAO;
 import dataaccess.UnauthorizedException;
@@ -39,11 +40,14 @@ public class Server {
     }
 
     private void exceptionHandler(Exception e, Context context) {
-        // todo: Put unauthorized error catch in this funciton to avoid duplicate code blocks
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         if (e instanceof UnauthorizedException)
         {
             context.status(401);
+        }
+        else if (e instanceof AlreadyTakenException)
+        {
+            context.status(403);
         }
         else {
             context.status(500);

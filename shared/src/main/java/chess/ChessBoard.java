@@ -100,7 +100,6 @@ public class ChessBoard {
 
     public void removePiece(ChessPosition pos)
     {
-        // todo: I cannot get original piece to be deleted
         int row = pos.getRow();
         int col = pos.getColumn();
         this.board[row-1][col-1] = null;

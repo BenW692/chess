@@ -128,19 +128,17 @@ public class ChessGame {
                 ChessPiece pieceCheck = tempBoard.getPiece(posCheck);
                 if (pieceCheck == null) {continue;}
                 // the piece is the same team, so it doesn't threaten check
-                else if (pieceCheck.getTeamColor() == teamColor) {
-                    continue;
-                }
+                else if (pieceCheck.getTeamColor() == teamColor) {continue;}
                 // piece is other team, so we need to check if it threatens check
-                else {
-                    Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(tempBoard, posCheck);
-                    for (var enemyMove : enemyMoves) {
-                        if (enemyMove.getEndPosition().equals(kingPos.get(teamColor))) {
-                            return true;
-                            }
-                        // else we keep checking;
+//                else {
+                Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(tempBoard, posCheck);
+                for (var enemyMove : enemyMoves) {
+                    if (enemyMove.getEndPosition().equals(kingPos.get(teamColor))) {
+                        return true;
                         }
+                    // else we keep checking;
                     }
+//                    }
                 }
             }
             return false;
@@ -158,22 +156,18 @@ public class ChessGame {
                 // check every piece on the board
                 ChessPosition posCheck = new ChessPosition(row, col);
                 ChessPiece pieceCheck = tempBoard.getPiece(posCheck);
-                if (pieceCheck == null) {
-                    continue;
-                }
+                if (pieceCheck == null) {continue;}
                 // the piece is the supplied team's color
-                else if (pieceCheck.getTeamColor() == teamColor) {
-                    continue;
-                }
+                else if (pieceCheck.getTeamColor() == teamColor) {continue;}
                 // the piece is the other team
-                else {
-                    Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(tempBoard, posCheck);
-                    for (var newMove : enemyMoves) {
-                        // can the other team's piece attack our king?
-                        if (newMove.getEndPosition().equals(kingPos.get(teamColor))) {
-                            return false;
-                        }
+//                else {
+                Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(tempBoard, posCheck);
+                for (var newMove : enemyMoves) {
+                    // can the other team's piece attack our king?
+                    if (newMove.getEndPosition().equals(kingPos.get(teamColor))) {
+                        return false;
                     }
+//                    }
                 }
             }
         }
@@ -202,7 +196,6 @@ public class ChessGame {
         ChessPosition target_pos = move.getEndPosition();
         ChessPiece target_piece = gameBoard.getPiece(target_pos);
         ChessPiece movingPiece = gameBoard.getPiece(start_pos);
-        // todo: do I need to keep track of what pieces got captured?
         if (movingPiece == null) {
             throw new InvalidMoveException("There is no piece at the supplied starting position.");
         }
@@ -240,21 +233,15 @@ public class ChessGame {
             for (int col = 1; col < 9; col++) {
                 ChessPosition posCheck = new ChessPosition(row, col);
                 ChessPiece pieceCheck = gameBoard.getPiece(posCheck);
-                if (pieceCheck == null) {
-                    continue;
-                }
+                if (pieceCheck == null) {continue;}
                 // the piece is the supplied team's color
-                else if (pieceCheck.getTeamColor() == teamColor) {
-                    continue;
-                }
+                else if (pieceCheck.getTeamColor() == teamColor) {continue;}
                 // the piece is the other team
-                else {
-                    Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(gameBoard, posCheck);
-                    for (var newMove : enemyMoves) {
-                        // can this piece attack our king?
-                        if (newMove.getEndPosition().equals(kingPos.get(teamColor))) {
-                            return true;
-                        }
+                Collection<ChessMove> enemyMoves = pieceCheck.pieceMoves(gameBoard, posCheck);
+                for (var newMove : enemyMoves) {
+                    // can this piece attack our king?
+                    if (newMove.getEndPosition().equals(kingPos.get(teamColor))) {
+                        return true;
                     }
                 }
             }
@@ -272,24 +259,7 @@ public class ChessGame {
     public boolean isInCheckmate(TeamColor teamColor) {
         if (!isInCheck(teamColor)) {return false;}
         else {
-            Collection<ChessMove> totalValidMoves = new ArrayList<>();
-            for (int row = 1; row < 9; row++) {
-                for (int col = 1; col < 9; col++) {
-                    ChessPosition posCheck = new ChessPosition(row, col);
-                    ChessPiece pieceCheck = gameBoard.getPiece(posCheck);
-                    if (pieceCheck == null) {continue;}
-                    // the piece is the other team, so it doesn't help us get out of check
-                    else if (pieceCheck.getTeamColor() != teamColor) {
-                        continue;
-                    }
-                    // piece is our team, so we need to check if can stop opponent check
-                    else {
-                        totalValidMoves.addAll(validMoves(posCheck));
-                        if (!totalValidMoves.isEmpty()) {return false;}
-                    }
-                }
-            }
-            return true;
+            return canPlayerMove(teamColor);
         }
     }
 
@@ -303,25 +273,27 @@ public class ChessGame {
     public boolean isInStalemate(TeamColor teamColor) {
         if (isInCheck(teamColor)) {return false;}
         else {
-            Collection<ChessMove> totalValidMoves = new ArrayList<>();
-            for (int row = 1; row < 9; row++) {
-                for (int col = 1; col < 9; col++) {
-                    ChessPosition posCheck = new ChessPosition(row, col);
-                    ChessPiece pieceCheck = gameBoard.getPiece(posCheck);
-                    if (pieceCheck == null) {continue;}
-                    // the piece is the other team, so it doesn't help us get out of check
-                    else if (pieceCheck.getTeamColor() != teamColor) {
-                        continue;
-                    }
-                    // piece is our team, so we need to check if can stop opponent check
-                    else {
-                        totalValidMoves.addAll(validMoves(posCheck));
-                        if (!totalValidMoves.isEmpty()) {return false;}
-                    }
+            return canPlayerMove(teamColor);
+        }
+    }
+
+    private boolean canPlayerMove(TeamColor teamColor) {
+        Collection<ChessMove> totalValidMoves = new ArrayList<>();
+        for (int row = 1; row < 9; row++) {
+            for (int col = 1; col < 9; col++) {
+                ChessPosition posCheck = new ChessPosition(row, col);
+                ChessPiece pieceCheck = gameBoard.getPiece(posCheck);
+                if (pieceCheck == null) {continue;}
+                // the piece is the other team, so it doesn't help us get out of check
+                else if (pieceCheck.getTeamColor() != teamColor) {continue;}
+                // piece is our team, so we need to check if can stop opponent check
+                totalValidMoves.addAll(validMoves(posCheck));
+                if (!totalValidMoves.isEmpty()) {
+                    return false;
                 }
             }
-            return true;
         }
+        return true;
     }
 
     /**
