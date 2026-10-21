@@ -18,8 +18,14 @@ public class LocalSessionDAO implements SessionDAO {
     }
 
     @Override
-    public UserData getUser(String username) {
+    public UserData getUserWUsername(String username) {
         return userMap.getOrDefault(username, null);
+    }
+
+    @Override
+    public UserData getUserWAuth(String authToken) {
+        String username = authTokens.getOrDefault(authToken, null).username();
+        return getUserWUsername(username);
     }
 
     @Override
@@ -57,8 +63,9 @@ public class LocalSessionDAO implements SessionDAO {
     }
 
     @Override
-    public boolean updateGame() {
-        return false;
+    public void updateGame(GameData updatedGame, GameData originalGame) {
+        gameMap.remove(originalGame.gameID());
+        gameMap.put(updatedGame.gameID(), updatedGame);
     }
 
     public void clearApp() {

@@ -2,7 +2,6 @@ package service;
 
 import dataaccess.*;
 import model.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -15,7 +14,7 @@ public class UserService {
     public void validatePassword() {}
 
     public RegisterResult register(RegisterRequest req) throws AlreadyTakenException {
-        UserData user = sessionDao.getUser(req.username());
+        UserData user = sessionDao.getUserWUsername(req.username());
         if (user != null)
         {
             throw new AlreadyTakenException("username already taken");
@@ -35,7 +34,7 @@ public class UserService {
     }
 
     public LoginResult login(LoginRequest req) throws UserNotFoundException {
-        UserData user = sessionDao.getUser(req.username());
+        UserData user = sessionDao.getUserWUsername(req.username());
         if (user == null)
         {
             throw new UserNotFoundException("bad request. User was not found in the database.");
