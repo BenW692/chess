@@ -22,6 +22,10 @@ public class PieceMoveOptions {
                 List.of(-1, -1),
                 List.of(-1, 1)
         );
+        return linearMoveMask(board, myPosition, move_masks, start_row, start_col, color, moves);
+    }
+
+    private Collection<ChessMove> linearMoveMask(ChessBoard board, ChessPosition myPosition, List<List<Integer>> move_masks, int start_row, int start_col, ChessGame.TeamColor color, Collection<ChessMove> moves) {
         for (var mask : move_masks)
         {
             int row_adj = mask.getFirst();
@@ -52,19 +56,7 @@ public class PieceMoveOptions {
                 List.of(1, -2),
                 List.of(-1, -2)
         );
-        for (var mask : move_masks)
-        {
-            int row_adj = mask.getFirst();
-            int col_adj = mask.getLast();
-            int new_row = start_row + row_adj;
-            int new_col = start_col + col_adj;
-            ChessPosition newPos = new ChessPosition(new_row, new_col);
-            if (isMoveValid(board, newPos, color)) {
-                ChessMove newMove = new ChessMove(myPosition, newPos);
-                moves.add(newMove);
-            }
-        }
-        return moves;
+        return linearMoveMask(board, myPosition, move_masks, start_row, start_col, color, moves);
     }
 
     public Collection<ChessMove> rookPieceMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor col) {
@@ -78,26 +70,7 @@ public class PieceMoveOptions {
                 List.of(1, 0),
                 List.of(-1, 0)
         );
-        for (var mask : move_masks)
-        {
-            int row_adj = mask.getFirst();
-            int col_adj = mask.getLast();
-            for (int mult = 1; mult < 8; mult ++) {
-                int new_row = start_row + row_adj * mult;
-                int new_col = start_col + col_adj * mult;
-                ChessPosition newPos = new ChessPosition(new_row, new_col);
-                if (isMoveValid(board, newPos, color)) {
-                    ChessMove newMove = new ChessMove(myPosition, newPos);
-                    moves.add(newMove);
-                    if (wasCaptured) {
-                        wasCaptured = false;
-                        break;
-                    }
-                }
-                else {break;}
-            }
-        }
-        return moves;
+        return multiplierMoveMask(board, myPosition, move_masks, start_row, start_col, color, moves);
     }
 
     public Collection<ChessMove> bishopPieceMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor col) {
@@ -111,6 +84,10 @@ public class PieceMoveOptions {
                 List.of(-1, 1),
                 List.of(-1, -1)
         );
+        return multiplierMoveMask(board, myPosition, move_masks, start_row, start_col, color, moves);
+    }
+
+    private Collection<ChessMove> multiplierMoveMask(ChessBoard board, ChessPosition myPosition, List<List<Integer>> move_masks, int start_row, int start_col, ChessGame.TeamColor color, Collection<ChessMove> moves) {
         for (var mask : move_masks)
         {
             int row_adj = mask.getFirst();
@@ -157,11 +134,11 @@ public class PieceMoveOptions {
                     ChessMove newMove = new ChessMove(myPosition, newPos);
                     moves.add(newMove);
                 }
-                moves.addAll(blackPawnValidMoves(board, myPosition, color));
+                moves.addAll(pawnValidMoves(board, myPosition, color));
             }
             //promotion
             else if (start_row == 2) {
-                Collection<ChessMove> normMoves = blackPawnValidMoves(board, myPosition, color);
+                Collection<ChessMove> normMoves = pawnValidMoves(board, myPosition, color);
                 for (var move : normMoves)
                 {
                     ChessPosition endPosition = move.getEndPosition();
@@ -173,7 +150,7 @@ public class PieceMoveOptions {
             }
             //normal
             else {
-                moves = blackPawnValidMoves(board, myPosition, color);
+                moves = pawnValidMoves(board, myPosition, color);
             }
         }
         else {
@@ -187,11 +164,11 @@ public class PieceMoveOptions {
                     ChessMove newMove = new ChessMove(myPosition, newPos);
                     moves.add(newMove);
                 }
-                moves.addAll(whitePawnValidMoves(board, myPosition, color));
+                moves.addAll(pawnValidMoves(board, myPosition, color));
             }
             //promotion
             else if (start_row == 7) {
-                Collection<ChessMove> normMoves = whitePawnValidMoves(board, myPosition, color);
+                Collection<ChessMove> normMoves = pawnValidMoves(board, myPosition, color);
                 for (var move : normMoves)
                 {
                     ChessPosition endPosition = move.getEndPosition();
@@ -203,7 +180,7 @@ public class PieceMoveOptions {
             }
             //normal
             else {
-                moves = whitePawnValidMoves(board, myPosition, color);
+                moves = pawnValidMoves(board, myPosition, color);
             }
         }
         return moves;
@@ -232,42 +209,21 @@ public class PieceMoveOptions {
         else {return false;}
     }
 
-    public Collection<ChessMove> blackPawnValidMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor color){
-        Collection<ChessPosition> attackPositions = new ArrayList<>();
-        Collection<ChessMove> moves = new ArrayList<>();
-
-        int start_row = myPosition.getRow();
-        int start_col = myPosition.getColumn();
-        ChessPosition forward = new ChessPosition(start_row - 1, start_col);
-        ChessPosition left_attack = new ChessPosition(start_row - 1, start_col - 1);
-        ChessPosition right_attack = new ChessPosition(start_row - 1, start_col + 1);
-
-        attackPositions.add(left_attack);
-        attackPositions.add(right_attack);
-        // check forward
-        if (isMoveInBounds(forward) && board.getPiece(forward) == null) {moves.add(new ChessMove(myPosition, forward));}
-        // check attacks
-        for (var attack : attackPositions)
+    public Collection<ChessMove> pawnValidMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor color){
+        int sign_multiplier;
+        if (color == ChessGame.TeamColor.BLACK)
         {
-            if (!isMoveInBounds(attack)) {continue;}
-            ChessPiece newPiece = board.getPiece(attack);
-            // enemy spot?
-            if (newPiece != null && newPiece.getTeamColor() != color) {
-                moves.add(new ChessMove(myPosition, attack));
-            }
+            sign_multiplier = -1;
         }
-        return moves;
-    }
-
-    public Collection<ChessMove> whitePawnValidMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor color){
+        else {sign_multiplier = 1;}
         Collection<ChessPosition> attackPositions = new ArrayList<>();
         Collection<ChessMove> moves = new ArrayList<>();
 
         int start_row = myPosition.getRow();
         int start_col = myPosition.getColumn();
-        ChessPosition forward = new ChessPosition(start_row + 1, start_col);
-        ChessPosition left_attack = new ChessPosition(start_row + 1, start_col - 1);
-        ChessPosition right_attack = new ChessPosition(start_row + 1, start_col + 1);
+        ChessPosition forward = new ChessPosition(start_row + sign_multiplier, start_col);
+        ChessPosition left_attack = new ChessPosition(start_row + sign_multiplier, start_col - 1);
+        ChessPosition right_attack = new ChessPosition(start_row + sign_multiplier, start_col + 1);
 
         attackPositions.add(left_attack);
         attackPositions.add(right_attack);

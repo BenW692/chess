@@ -34,15 +34,7 @@ public class LogoutHandler implements Handler {
             return;
         }
         UserService userService = new UserService(sessionDAO);
-        try {
-            userService.logout(logoutRequest);
-            context.status(200);
-        }
-        catch (UnauthorizedException e)
-        {
-            var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
-            context.status(401);
-            context.json(body);
-        }
+        userService.logout(logoutRequest);
+        context.status(200);
     }
 }

@@ -41,17 +41,11 @@ public class CreateGameHandler implements Handler {
         }
         UserService userService = new UserService(sessionDAO);
         GameService gameService = new GameService(sessionDAO);
-        try {
-            userService.authenticateUser(createGameRequest.authToken());
-            CreateGameResult createGameResult = gameService.createGame(createGameRequest);
-            context.json(new Gson().toJson(createGameResult));
-            context.status(200);
-        }
-        catch (UnauthorizedException e)
-        {
-            var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
-            context.status(401);
-            context.json(body);
-        }
+
+        userService.authenticateUser(createGameRequest.authToken());
+        CreateGameResult createGameResult = gameService.createGame(createGameRequest);
+        context.json(new Gson().toJson(createGameResult));
+        context.status(200);
+        
     }
 }

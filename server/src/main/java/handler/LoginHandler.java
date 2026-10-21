@@ -43,11 +43,6 @@ public class LoginHandler implements Handler {
             context.status(401);
             context.json(body);
         }
-        catch (UnauthorizedException e)
-        {
-            var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
-            context.status(401);
-            context.json(body);
-        }
+        
     }
 }

@@ -31,17 +31,11 @@ public class ListGamesHandler implements Handler {
         }
         UserService userService = new UserService(sessionDAO);
         GameService gameService = new GameService(sessionDAO);
-        try {
-            userService.authenticateUser(listGameRequest.authToken());
-            ListGameResult listGameResult = gameService.listGames(listGameRequest);
-            context.json(new Gson().toJson(listGameResult));
-            context.status(200);
-        }
-        catch (UnauthorizedException e)
-        {
-            var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
-            context.status(401);
-            context.json(body);
-        }
+
+        userService.authenticateUser(listGameRequest.authToken());
+        ListGameResult listGameResult = gameService.listGames(listGameRequest);
+        context.json(new Gson().toJson(listGameResult));
+        context.status(200);
+        
     }
 }

@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.LocalSessionDAO;
 import dataaccess.SessionDAO;
+import dataaccess.UnauthorizedException;
 import handler.*;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -40,7 +41,13 @@ public class Server {
     private void exceptionHandler(Exception e, Context context) {
         // todo: Put unauthorized error catch in this funciton to avoid duplicate code blocks
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
-        context.status(500);
+        if (e instanceof UnauthorizedException)
+        {
+            context.status(401);
+        }
+        else {
+            context.status(500);
+        }
         context.json(body);
     }
 

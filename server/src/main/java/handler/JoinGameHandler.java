@@ -44,12 +44,7 @@ public class JoinGameHandler implements Handler {
             userService.authenticateUser(joinGameRequest.authToken());
             gameService.joinGame(joinGameRequest);
         }
-        catch (UnauthorizedException e)
-        {
-            var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
-            context.status(401);
-            context.json(body);
-        }
+        
         catch (GameNotFoundException e)
         {
             var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
