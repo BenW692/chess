@@ -11,11 +11,11 @@ public class GameService {
     private SessionDAO sessionDAO;
     public GameService(SessionDAO sessionDAO) {this.sessionDAO = sessionDAO;}
 
-    public GameData getGame(int gameID) {
+    private GameData getGame(int gameID) {
         return sessionDAO.getGame(gameID);
     };
 
-    public void addPlayer(GameData game, JoinGameRequest joinGameRequest) {
+    private void addPlayer(GameData game, JoinGameRequest joinGameRequest) {
         // we can delete the original game and then recreate it
         UserData userData = sessionDAO.getUserWAuth(joinGameRequest.authToken());
         String username = userData.username();
@@ -34,7 +34,7 @@ public class GameService {
         return new CreateGameResult(gameID);
     };
 
-    public void checkGameAvailability(GameData game, String playerColor) {
+    private void checkGameAvailability(GameData game, String playerColor) {
         if (playerColor.equalsIgnoreCase("white")) {
             if (game.whiteUsername() != null){
                 throw new AlreadyTakenException("Already taken");
@@ -47,7 +47,7 @@ public class GameService {
         }
     }
 
-    public ListGameResult listGames(ListGameRequest listGameRequest) {
+    public ListGameResult listGames() {
         Collection<GameData> games = sessionDAO.listGames();
         return new ListGameResult(games);
     }

@@ -33,7 +33,7 @@ public class ListGamesHandler implements Handler {
         GameService gameService = new GameService(sessionDAO);
 
         userService.authenticateUser(listGameRequest.authToken());
-        ListGameResult listGameResult = gameService.listGames(listGameRequest);
+        ListGameResult listGameResult = gameService.listGames();
         context.json(new Gson().toJson(listGameResult));
         context.status(200);
         

@@ -50,7 +50,7 @@ public class UserService {
         sessionDao.deleteAuth(req.authToken());
     }
 
-    public static String generateToken() {
+    private static String generateToken() {
         return UUID.randomUUID().toString();
     }
 
