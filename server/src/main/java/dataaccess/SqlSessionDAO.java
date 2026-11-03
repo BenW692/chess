@@ -1,5 +1,10 @@
 package dataaccess;
 
+import chess.ChessGame;
+import chess.ChessPiece;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 import com.mysql.cj.xdevapi.UpdateType;
 import model.AuthData;
 import model.GameData;
@@ -9,10 +14,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class SqlSessionDAO implements SessionDAO{
     private final List<String> createStatements = List.of(
@@ -166,12 +168,32 @@ public class SqlSessionDAO implements SessionDAO{
 
     @Override
     public int createGame(String gameName) {
-        return 0;
+        int gameID = new Random().nextInt(9000) + 1000;
+        ChessGame chessGame = new ChessGame();
+        String jsonChessGame = new Gson().toJson(chessGame);
+        String statement = "INSERT INTO games VALUES (?, NULL, NULL, ?, ?)";
+        List<Object> params = List.of(gameID, gameName, jsonChessGame);
+        sendSqlCommand(statement, sqlCommandType.UPDATE, params);
+        return gameID;
     }
 
     @Override
     public GameData getGame(int gameID) {
-        return null;
+        String statement = "SELECT * FROM games WHERE gameID = ?";
+        List<Object> params = List.of(gameID);
+        List<List<Object>> rs = sendSqlCommand(statement, sqlCommandType.QUERY, params);
+        List<Object>  rs_row = rs.getFirst();
+        // todo: make this its own method
+        ChessGame chessGame = new Gson().fromJson(rs_row.get(4).toString(), ChessGame.class);
+        var wUsername = rs_row.get(1);
+        var bUsername = rs_row.get(2);
+        String wUsernameStr;
+        String bUsernameStr;
+        if (wUsername != null) {wUsernameStr = wUsername.toString();}
+        else {wUsernameStr = null;}
+        if (bUsername != null) {bUsernameStr = bUsername.toString();}
+        else {bUsernameStr = null;}
+        return new GameData(gameID, wUsernameStr, bUsernameStr, rs_row.get(3).toString(), chessGame);
     }
 
     @Override
@@ -208,15 +230,19 @@ public class SqlSessionDAO implements SessionDAO{
             createUser(ud);
             UserData user = getUserWUsername("ben");
             System.out.println(user);
+            System.out.println("Password check was succesful: " + checkPassword("yungthug", "ben"));
             AuthData ad = new AuthData("1234_5678", "ben");
             createAuth(ad);
             UserData authUser = getUserWAuth(ad.authToken());
             System.out.println(authUser);
             AuthData authData = getAuth(ad.authToken());
             System.out.println(authData);
-            deleteAuth(authData.authToken());
-            AuthData authDataRetry = getAuth(ad.authToken());
-            System.out.println(authDataRetry);
+//            deleteAuth(authData.authToken());
+//            AuthData authDataRetry = getAuth(ad.authToken());
+//            System.out.println(authDataRetry);
+            int gameID = createGame("chess");
+            GameData gameData = getGame(gameID);
+            System.out.println(gameData);
         }
         finally {
             clearApp();
