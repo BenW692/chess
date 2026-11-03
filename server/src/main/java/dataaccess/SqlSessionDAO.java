@@ -65,20 +65,6 @@ public class SqlSessionDAO implements SessionDAO{
         UPDATE
     }
 
-    public void main() throws DataAccessException {
-       UserData ud = new UserData("ben", "yungthug", "sparkleboi@x.com");
-       createUser(ud);
-       UserData user = getUserWUsername("ben");
-       System.out.println(user);
-       AuthData ad = new AuthData("1234_5678", "ben");
-       createAuth(ad);
-       UserData authUser = getUserWAuth(ad.authToken());
-       System.out.println(authUser);
-       AuthData authData = getAuth(ad.authToken());
-       System.out.println(authData);
-       clearApp();
-    }
-
     public List<List<Object>> sendSqlCommand(String statement, sqlCommandType type, List<Object> params) {
         List<List<Object>> rows = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection()) {
@@ -167,7 +153,9 @@ public class SqlSessionDAO implements SessionDAO{
 
     @Override
     public void deleteAuth(String authToken) {
-
+        String statement = "DELETE FROM auth WHERE authToken = ?";
+        List<Object> params = List.of(authToken);
+        sendSqlCommand(statement, sqlCommandType.UPDATE, params);
     }
 
     @Override
@@ -199,6 +187,27 @@ public class SqlSessionDAO implements SessionDAO{
         );
         for (var statement : clearStatements) {
             sendSqlCommand(statement, sqlCommandType.UPDATE, emtpyList);
+        }
+    }
+
+    public void main() throws DataAccessException {
+        try {
+            UserData ud = new UserData("ben", "yungthug", "sparkleboi@x.com");
+            createUser(ud);
+            UserData user = getUserWUsername("ben");
+            System.out.println(user);
+            AuthData ad = new AuthData("1234_5678", "ben");
+            createAuth(ad);
+            UserData authUser = getUserWAuth(ad.authToken());
+            System.out.println(authUser);
+            AuthData authData = getAuth(ad.authToken());
+            System.out.println(authData);
+            deleteAuth(authData.authToken());
+            AuthData authDataRetry = getAuth(ad.authToken());
+            System.out.println(authDataRetry);
+        }
+        finally {
+            clearApp();
         }
     }
 }
