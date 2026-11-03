@@ -72,8 +72,10 @@ public class SqlSessionDAO implements SessionDAO{
        System.out.println(user);
        AuthData ad = new AuthData("1234_5678", "ben");
        createAuth(ad);
-       UserData auth_user = getUserWAuth(ad.authToken());
-       System.out.println(auth_user);
+       UserData authUser = getUserWAuth(ad.authToken());
+       System.out.println(authUser);
+       AuthData authData = getAuth(ad.authToken());
+       System.out.println(authData);
        clearApp();
     }
 
@@ -156,7 +158,11 @@ public class SqlSessionDAO implements SessionDAO{
 
     @Override
     public AuthData getAuth(String authToken) {
-        return null;
+        String statement = "SELECT username FROM auth WHERE authToken = ?";
+        List<Object> params = List.of(authToken);
+        List<List<Object>> rs = sendSqlCommand(statement, sqlCommandType.QUERY, params);
+        List<Object>  rs_row = rs.getFirst();
+        return new AuthData(authToken, rs_row.getFirst().toString());
     }
 
     @Override
