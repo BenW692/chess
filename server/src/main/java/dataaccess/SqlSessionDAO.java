@@ -70,6 +70,10 @@ public class SqlSessionDAO implements SessionDAO{
        createUser(ud);
        UserData user = getUserWUsername("ben");
        System.out.println(user);
+       AuthData ad = new AuthData("1234_5678", "ben");
+       createAuth(ad);
+       UserData auth_user = getUserWAuth(ad.authToken());
+       System.out.println(auth_user);
        clearApp();
     }
 
@@ -145,6 +149,9 @@ public class SqlSessionDAO implements SessionDAO{
 
     @Override
     public void createAuth(AuthData authData) {
+        String statement = "INSERT INTO auth VALUES (?, ?)";
+        List<Object> params = List.of(authData.authToken(), authData.username());
+        sendSqlCommand(statement, sqlCommandType.UPDATE, params);
     }
 
     @Override
