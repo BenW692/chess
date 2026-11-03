@@ -73,4 +73,9 @@ public class LocalSessionDAO implements SessionDAO {
         authTokens.clear();
         userMap.clear();
     }
+
+    @Override
+    public boolean checkPassword(String inputPassword, String username) {
+        return inputPassword.equals(getUserWUsername(username).password());
+    }
 }

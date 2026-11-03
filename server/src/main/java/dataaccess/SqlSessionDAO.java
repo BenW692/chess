@@ -4,6 +4,7 @@ import com.mysql.cj.xdevapi.UpdateType;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.xml.crypto.Data;
 import java.sql.Connection;
@@ -111,8 +112,13 @@ public class SqlSessionDAO implements SessionDAO{
     @Override
     public void createUser(UserData userData) {
         String statement = "INSERT INTO user VALUES (?, ?, ?)";
-        List<Object> params = List.of(userData.username(), userData.password(), userData.email());
+        String encrypted_pass = encryptPassword(userData.password());
+        List<Object> params = List.of(userData.username(), encrypted_pass, userData.email());
         sendSqlCommand(statement, sqlCommandType.UPDATE, params);
+    }
+
+    String encryptPassword(String clearTextPassword) {
+        return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
     }
 
     @Override
@@ -188,6 +194,12 @@ public class SqlSessionDAO implements SessionDAO{
         for (var statement : clearStatements) {
             sendSqlCommand(statement, sqlCommandType.UPDATE, emtpyList);
         }
+    }
+
+    @Override
+    public boolean checkPassword(String inputPassword, String username) {
+        var hashedpassword = getUserWUsername(username).password();
+        return BCrypt.checkpw(inputPassword, hashedpassword);
     }
 
     public void main() throws DataAccessException {

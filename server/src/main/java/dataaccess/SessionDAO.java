@@ -18,4 +18,5 @@ public interface SessionDAO {
     Collection<GameData> listGames();
     void updateGame(GameData updatedGame, GameData originalGame);
     void clearApp();
+    boolean checkPassword(String inputPassword, String username);
 }

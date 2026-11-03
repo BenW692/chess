@@ -38,7 +38,7 @@ public class UserService {
             throw new UserNotFoundException("bad request. User was not found in the database.");
         }
         // check if provided password matches password in the database
-        if (!req.password().equals(user.password())){
+        if (!sessionDao.checkPassword(req.password(), req.username())){
             throw new UnauthorizedException("unauthorized. Password was incorrect.");
         }
         AuthData newAuthData = createAndSaveAuthToken(req.username());
