@@ -128,6 +128,9 @@ public class SqlSessionDAO implements SessionDAO{
         String statement = "SELECT * FROM user WHERE username = ?";
         List<Object> params = List.of(username);
         List<List<Object>> rs = sendSqlCommand(statement, sqlCommandType.QUERY, params);
+        if (rs.isEmpty()){
+            return null;
+        }
         List<Object>  rs_row = rs.getFirst();
         return new UserData(rs_row.get(0).toString(), rs_row.get(1).toString(), rs_row.get(2).toString());
     }
@@ -137,6 +140,9 @@ public class SqlSessionDAO implements SessionDAO{
         String statement = "SELECT username FROM auth WHERE authToken = ?";
         List<Object> params = List.of(authToken);
         List<List<Object>> rs = sendSqlCommand(statement, sqlCommandType.QUERY, params);
+        if (rs.isEmpty()){
+            return null;
+        }
         List<Object>  rs_row = rs.getFirst();
         // auth will return two things (authToken, username)
         String username = rs_row.getFirst().toString();
@@ -155,6 +161,9 @@ public class SqlSessionDAO implements SessionDAO{
         String statement = "SELECT username FROM auth WHERE authToken = ?";
         List<Object> params = List.of(authToken);
         List<List<Object>> rs = sendSqlCommand(statement, sqlCommandType.QUERY, params);
+        if (rs.isEmpty()){
+            return null;
+        }
         List<Object>  rs_row = rs.getFirst();
         return new AuthData(authToken, rs_row.getFirst().toString());
     }
@@ -182,6 +191,9 @@ public class SqlSessionDAO implements SessionDAO{
         String statement = "SELECT * FROM games WHERE gameID = ?";
         List<Object> params = List.of(gameID);
         List<List<Object>> rs = sendSqlCommand(statement, sqlCommandType.QUERY, params);
+        if (rs.isEmpty()){
+            return null;
+        }
         List<Object>  rs_row = rs.getFirst();
         // todo: make this its own method
         ChessGame chessGame = new Gson().fromJson(rs_row.get(4).toString(), ChessGame.class);

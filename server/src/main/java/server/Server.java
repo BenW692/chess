@@ -1,10 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.AlreadyTakenException;
-import dataaccess.LocalSessionDAO;
-import dataaccess.SessionDAO;
-import dataaccess.UnauthorizedException;
+import dataaccess.*;
 import handler.*;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -19,7 +16,7 @@ public class Server {
 
     public Server ()
     {
-        this.sessionDAO = new LocalSessionDAO();
+        this.sessionDAO = new SqlSessionDAO();
         final RegisterHandler regHandler = new RegisterHandler(sessionDAO);
         final ClearAppHandler clearAppHandler = new ClearAppHandler(sessionDAO);
         final LoginHandler loginHandler = new LoginHandler(sessionDAO);
