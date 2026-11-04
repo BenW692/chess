@@ -9,6 +9,7 @@ import com.mysql.cj.xdevapi.UpdateType;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.jetbrains.annotations.NotNull;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.xml.crypto.Data;
@@ -195,7 +196,11 @@ public class SqlSessionDAO implements SessionDAO{
             return null;
         }
         List<Object>  rs_row = rs.getFirst();
-        // todo: make this its own method
+        return parseGameQueryResponse(rs_row);
+    }
+
+    @NotNull
+    private static GameData parseGameQueryResponse(List<Object> rs_row) {
         ChessGame chessGame = new Gson().fromJson(rs_row.get(4).toString(), ChessGame.class);
         var wUsername = rs_row.get(1);
         var bUsername = rs_row.get(2);
@@ -205,17 +210,43 @@ public class SqlSessionDAO implements SessionDAO{
         else {wUsernameStr = null;}
         if (bUsername != null) {bUsernameStr = bUsername.toString();}
         else {bUsernameStr = null;}
-        return new GameData(gameID, wUsernameStr, bUsernameStr, rs_row.get(3).toString(), chessGame);
+        return new GameData((Integer) rs_row.get(0), wUsernameStr, bUsernameStr, rs_row.get(3).toString(), chessGame);
     }
 
     @Override
     public Collection<GameData> listGames() {
-        return List.of();
+        Collection<GameData> games = new ArrayList<>();
+        String statement = "SELECT * FROM games";
+        List<Object> params = List.of();
+        List<List<Object>> rs = sendSqlCommand(statement, sqlCommandType.QUERY, params);
+        for (var row : rs) {
+            GameData gameData = parseGameQueryResponse(row);
+            games.add(gameData);
+        }
+        return games;
     }
 
     @Override
     public void updateGame(GameData updatedGame, GameData originalGame) {
-
+        String jsonChessGame = new Gson().toJson(updatedGame.game());
+        String wUsername = updatedGame.whiteUsername();
+        String bUsername = updatedGame.blackUsername();
+        String statement;
+        List<Object> params;
+        if (wUsername != null && bUsername != null){
+            statement = "UPDATE games SET whiteUsername = ?, blackUsername = ?, game = ? WHERE gameID=?";
+            params = List.of(wUsername, bUsername, jsonChessGame, originalGame.gameID());
+        }
+        // Since join game only lets one player join at a time I can check which player is not null and respond appropriately
+        else if (wUsername != null){
+            statement = "UPDATE games SET whiteUsername = ?, game = ? WHERE gameID=?";
+            params = List.of(wUsername, jsonChessGame, originalGame.gameID());
+        }
+        else {
+            statement = "UPDATE games SET blackUsername = ?, game = ? WHERE gameID=?";
+            params = List.of(bUsername, jsonChessGame, originalGame.gameID());
+        }
+        sendSqlCommand(statement, sqlCommandType.UPDATE, params);
     }
 
     @Override
