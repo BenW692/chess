@@ -5,6 +5,7 @@ import dataaccess.*;
 import handler.*;
 import io.javalin.*;
 import io.javalin.http.Context;
+import io.javalin.http.HttpResponseException;
 import model.CreateGameResult;
 import model.ListGameRequest;
 
@@ -13,10 +14,19 @@ import java.util.Map;
 public class Server {
     public SessionDAO sessionDAO;
     private final Javalin javalin;
+    private boolean databaseConnection;
 
     public Server ()
     {
-        this.sessionDAO = new SqlSessionDAO();
+        javalin = Javalin.create(config -> config.staticFiles.add("web"));
+        try {
+            this.sessionDAO = new SqlSessionDAO();
+            databaseConnection = true;
+        }
+        catch (DataAccessException e) {
+            System.out.println(e.getMessage());
+            databaseConnection = false;
+        }
         final RegisterHandler regHandler = new RegisterHandler(sessionDAO);
         final ClearAppHandler clearAppHandler = new ClearAppHandler(sessionDAO);
         final LoginHandler loginHandler = new LoginHandler(sessionDAO);
@@ -24,7 +34,6 @@ public class Server {
         final ListGamesHandler listGamesHandler = new ListGamesHandler(sessionDAO);
         final CreateGameHandler createGameHandler = new CreateGameHandler(sessionDAO);
         final JoinGameHandler joinGameHandler = new JoinGameHandler(sessionDAO);
-        javalin = Javalin.create(config -> config.staticFiles.add("web"));
         // Register your endpoints and exception handlers here.
         javalin.post("/user", regHandler);
         javalin.delete("/db", clearAppHandler);
@@ -34,11 +43,17 @@ public class Server {
         javalin.post("/game", createGameHandler);
         javalin.put("/game", joinGameHandler);
         javalin.exception(Exception.class, this::exceptionHandler);
+        javalin.before(this::beforeCheck);
     }
 
     private void exceptionHandler(Exception e, Context context) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
-        if (e instanceof UnauthorizedException)
+        if (e instanceof HttpResponseException)
+        {
+            context.status(500);
+//            context.json(new Gson().toJson(Map.of("message", "Database could not connect")));
+        }
+        else if (e instanceof UnauthorizedException)
         {
             context.status(401);
         }
@@ -50,6 +65,15 @@ public class Server {
             context.status(500);
         }
         context.json(body);
+    }
+
+    private void beforeCheck(Context context) {
+        if (!databaseConnection) {
+            context.status(500);
+//            context.result("Error: Database cannot connect.");
+//            context.json(new Gson().toJson(Map.of("message", "Database could not connect")));
+            throw new HttpResponseException(500, "Database could not connect");
+        }
     }
 
     public int run(int desiredPort) {

@@ -12,6 +12,7 @@ import model.UserData;
 import org.jetbrains.annotations.NotNull;
 import org.mindrot.jbcrypt.BCrypt;
 
+import javax.management.RuntimeErrorException;
 import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -49,18 +50,12 @@ public class SqlSessionDAO implements SessionDAO{
 
     private List<Object> emtpyList = List.of();
 
-    public SqlSessionDAO (){
+    public SqlSessionDAO () throws DataAccessException {
         try {
             configureDatabase();
         }
-        catch (ResponseException e) {
-            System.out.println(e);
-        }
-        catch (DataAccessException e) {
-            System.out.println(e);
-        }
         catch (Exception e) {
-            System.out.println(e);
+            throw new DataAccessException(e.getMessage());
         }
     }
 
@@ -107,8 +102,13 @@ public class SqlSessionDAO implements SessionDAO{
             }
         } catch (SQLException ex) {
             throw new ResponseException(String.format("Unable to configure database: %s", ex.getMessage()));
-        } catch (Exception e) {
+        }
+        catch (DataAccessException e){
+            throw new DataAccessException("Database could not connect.");
+        }
+        catch (Exception e) {
             System.out.println(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -267,28 +267,4 @@ public class SqlSessionDAO implements SessionDAO{
         return BCrypt.checkpw(inputPassword, hashedpassword);
     }
 
-    public void main() throws DataAccessException {
-        try {
-            UserData ud = new UserData("ben", "yungthug", "sparkleboi@x.com");
-            createUser(ud);
-            UserData user = getUserWUsername("ben");
-            System.out.println(user);
-            System.out.println("Password check was succesful: " + checkPassword("yungthug", "ben"));
-            AuthData ad = new AuthData("1234_5678", "ben");
-            createAuth(ad);
-            UserData authUser = getUserWAuth(ad.authToken());
-            System.out.println(authUser);
-            AuthData authData = getAuth(ad.authToken());
-            System.out.println(authData);
-//            deleteAuth(authData.authToken());
-//            AuthData authDataRetry = getAuth(ad.authToken());
-//            System.out.println(authDataRetry);
-            int gameID = createGame("chess");
-            GameData gameData = getGame(gameID);
-            System.out.println(gameData);
-        }
-        finally {
-            clearApp();
-        }
-    }
 }
