@@ -127,11 +127,6 @@ public class SqlSessionDAO implements SessionDAO{
     }
 
     @Override
-    public boolean checkDatabaseConnection() {
-        return databaseConnection;
-    }
-
-    @Override
     public void createUser(UserData userData) throws DataAccessException {
         String statement = "INSERT INTO user VALUES (?, ?, ?)";
         String encrypted_pass = encryptPassword(userData.password());

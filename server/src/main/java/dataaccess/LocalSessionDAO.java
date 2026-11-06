@@ -18,11 +18,6 @@ public class LocalSessionDAO implements SessionDAO {
     }
 
     @Override
-    public boolean checkDatabaseConnection() {
-        return true;
-    }
-
-    @Override
     public void createUser(UserData userData) {
         userMap.put(userData.username(), userData);
     }
