@@ -8,7 +8,6 @@ import java.util.Collection;
 
 public interface SessionDAO {
     void setDatabaseConnection(boolean bool) throws DataAccessException;
-    boolean checkDatabaseConnection();
     void createUser(UserData userData) throws DataAccessException; // this will probably throw an exception if we find a user when we try to create
     UserData getUserWUsername(String username) throws DataAccessException;
     UserData getUserWAuth(String authToken) throws DataAccessException;

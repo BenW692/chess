@@ -42,7 +42,6 @@ public class Server {
         javalin.post("/game", createGameHandler);
         javalin.put("/game", joinGameHandler);
         javalin.exception(Exception.class, this::exceptionHandler);
-//        javalin.before(this::beforeCheck);
     }
 
     private void exceptionHandler(Exception e, Context context) {
@@ -59,15 +58,6 @@ public class Server {
             context.status(500);
         }
         context.json(body);
-    }
-
-    private void beforeCheck(Context context) {
-        if (!databaseConnection) {
-            context.status(500);
-//            context.result("Error: Database cannot connect.");
-//            context.json(new Gson().toJson(Map.of("message", "Database could not connect")));
-            throw new HttpResponseException(500, "Database could not connect");
-        }
     }
 
     public int run(int desiredPort) {

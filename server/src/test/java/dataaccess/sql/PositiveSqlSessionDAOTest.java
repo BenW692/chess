@@ -32,20 +32,8 @@ class PositiveSqlSessionDAOTest {
         sessionDao.clearApp();
     }
 
-//    @Test
-//    void configureDatabase() {
-//    }
-//
-//    @Test
-//    void createUser() {
-//    }
-//
-//    @Test
-//    void getUserWUsername() {
-//    }
-
     @Test
-    void getUserWAuth() throws DataAccessException {
+    void getUserWAuthTest() throws DataAccessException {
         sessionDao.createUser(tempUserData);
         LoginRequest loginRequest = new LoginRequest(tempUserData.username(), tempUserData.password());
         LoginResult loginResult = userService.login(loginRequest);
@@ -53,13 +41,8 @@ class PositiveSqlSessionDAOTest {
         assertNotNull(userDataFromAuth);
     }
 
-    // todo: Write a few more tests for this file so I get the test coverage without having to use the integration sql that is copied code.
-//    @Test
-//    void createAuth() {
-//    }
-
     @Test
-    void getAuth() throws DataAccessException {
+    void getAuthTest() throws DataAccessException {
         sessionDao.createUser(tempUserData);
         LoginRequest loginRequest = new LoginRequest(tempUserData.username(), tempUserData.password());
         LoginResult loginResult = userService.login(loginRequest);
@@ -67,23 +50,15 @@ class PositiveSqlSessionDAOTest {
         assertEquals(tempUserData.username(), authData.username());
     }
 
-//    @Test
-//    void deleteAuth() {
-//    }
-
     @Test
-    void createGame() throws DataAccessException {
+    void createGameTest() throws DataAccessException {
         int gameID = sessionDao.createGame("chess");
         GameData gameData = sessionDao.getGame(gameID);
         assertNotNull(gameData);
     }
 
-//    @Test
-//    void getGame() {
-//    }
-
     @Test
-    void listGames() throws DataAccessException {
+    void listGamesTest() throws DataAccessException {
         int gameID = sessionDao.createGame("chess");
         Collection<GameData> games = sessionDao.listGames();
         assertEquals(1, games.size());
@@ -91,7 +66,7 @@ class PositiveSqlSessionDAOTest {
     }
 
     @Test
-    void updateGame() throws DataAccessException {
+    void updateGameTest() throws DataAccessException {
         int gameID = sessionDao.createGame("chess");
         GameData ogGameData = sessionDao.getGame(gameID);
         GameData newGameData = new GameData(gameID, "new guy",
@@ -100,12 +75,4 @@ class PositiveSqlSessionDAOTest {
         GameData datbaseNewGameData = sessionDao.getGame(gameID);
         assertEquals(datbaseNewGameData, newGameData);
     }
-
-//    @Test
-//    void clearApp() {
-//    }
-//
-//    @Test
-//    void checkPassword() {
-//    }
 }
