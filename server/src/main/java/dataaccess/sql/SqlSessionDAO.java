@@ -1,7 +1,10 @@
-package dataaccess;
+package dataaccess.sql;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
+import dataaccess.ResponseException;
+import dataaccess.SessionDAO;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -13,7 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-public class SqlSessionDAO implements SessionDAO{
+public class SqlSessionDAO implements SessionDAO {
     public boolean databaseConnection = false;
 
     private final List<String> createStatements = List.of(

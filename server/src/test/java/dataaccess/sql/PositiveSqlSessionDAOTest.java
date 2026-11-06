@@ -2,18 +2,16 @@ package dataaccess.sql;
 
 import chess.ChessGame;
 import dataaccess.DataAccessException;
-import dataaccess.SqlSessionDAO;
 import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import service.UserService;
 
 import java.util.Collection;
-import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class PositiveSqlSessionDAOTest {
