@@ -7,6 +7,9 @@ import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import service.UserService;
 
 import java.util.Collection;
@@ -51,6 +54,15 @@ class PositiveSqlSessionDAOTest {
     }
 
     @Test
+    void deleteAuthTest() throws DataAccessException {
+        sessionDao.createUser(tempUserData);
+        LoginRequest loginRequest = new LoginRequest(tempUserData.username(), tempUserData.password());
+        LoginResult loginResult = userService.login(loginRequest);
+        sessionDao.deleteAuth(loginResult.authToken());
+        assertNull(sessionDao.getAuth(loginResult.authToken()));
+    }
+
+    @Test
     void createGameTest() throws DataAccessException {
         int gameID = sessionDao.createGame("chess");
         GameData gameData = sessionDao.getGame(gameID);
@@ -65,12 +77,15 @@ class PositiveSqlSessionDAOTest {
         assertEquals(games.iterator().next().gameID(), gameID);
     }
 
-    @Test
-    void updateGameTest() throws DataAccessException {
+    @ParameterizedTest
+    @CsvSource({", test",
+                "test,",
+                "new guy, other guy"})
+    void updateGameTest(String wUsername, String bUsername) throws DataAccessException {
         int gameID = sessionDao.createGame("chess");
         GameData ogGameData = sessionDao.getGame(gameID);
-        GameData newGameData = new GameData(gameID, "new guy",
-                "other guy", ogGameData.gameName(), new ChessGame());
+        GameData newGameData = new GameData(gameID, wUsername,
+                bUsername, ogGameData.gameName(), new ChessGame());
         sessionDao.updateGame(newGameData, ogGameData);
         GameData datbaseNewGameData = sessionDao.getGame(gameID);
         assertEquals(datbaseNewGameData, newGameData);
