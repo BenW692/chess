@@ -20,6 +20,7 @@ public class JoinGameHandler implements Handler {
     public void handle(@NotNull Context context) throws Exception {
         JoinGameRequest joinGameRequest = null;
         try {
+            
             String header = context.header("authorization");
             String body = context.body();
             if (!body.contains("playerColor") || !body.contains("gameID") ||

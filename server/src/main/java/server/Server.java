@@ -21,11 +21,10 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         try {
             this.sessionDAO = new SqlSessionDAO();
-            databaseConnection = true;
         }
         catch (DataAccessException e) {
             System.out.println(e.getMessage());
-            databaseConnection = false;
+            return;
         }
         final RegisterHandler regHandler = new RegisterHandler(sessionDAO);
         final ClearAppHandler clearAppHandler = new ClearAppHandler(sessionDAO);
@@ -43,17 +42,12 @@ public class Server {
         javalin.post("/game", createGameHandler);
         javalin.put("/game", joinGameHandler);
         javalin.exception(Exception.class, this::exceptionHandler);
-        javalin.before(this::beforeCheck);
+//        javalin.before(this::beforeCheck);
     }
 
     private void exceptionHandler(Exception e, Context context) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
-        if (e instanceof HttpResponseException)
-        {
-            context.status(500);
-//            context.json(new Gson().toJson(Map.of("message", "Database could not connect")));
-        }
-        else if (e instanceof UnauthorizedException)
+        if (e instanceof UnauthorizedException)
         {
             context.status(401);
         }

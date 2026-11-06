@@ -14,6 +14,7 @@ public class ClearAppHandler implements Handler {
     public void handle(@NotNull Context context) throws Exception {
         try {
             sessionDAO.clearApp();
+            
             context.status(200);
         }
         catch (Exception e) {

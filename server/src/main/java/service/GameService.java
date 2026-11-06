@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.AlreadyTakenException;
+import dataaccess.DataAccessException;
 import dataaccess.GameNotFoundException;
 import dataaccess.SessionDAO;
 import model.*;
@@ -11,11 +12,11 @@ public class GameService {
     private SessionDAO sessionDAO;
     public GameService(SessionDAO sessionDAO) {this.sessionDAO = sessionDAO;}
 
-    private GameData getGame(int gameID) {
+    private GameData getGame(int gameID) throws DataAccessException {
         return sessionDAO.getGame(gameID);
     };
 
-    private void addPlayer(GameData game, JoinGameRequest joinGameRequest) {
+    private void addPlayer(GameData game, JoinGameRequest joinGameRequest) throws DataAccessException {
         // we can delete the original game and then recreate it
         UserData userData = sessionDAO.getUserWAuth(joinGameRequest.authToken());
         String username = userData.username();
@@ -29,7 +30,7 @@ public class GameService {
         sessionDAO.updateGame(updatedGame, game);
     };
 
-    public CreateGameResult createGame(CreateGameRequest req) {
+    public CreateGameResult createGame(CreateGameRequest req) throws DataAccessException {
         int gameID = sessionDAO.createGame(req.gameName());
         return new CreateGameResult(gameID);
     };
@@ -47,13 +48,12 @@ public class GameService {
         }
     }
 
-    public ListGameResult listGames() {
+    public ListGameResult listGames() throws DataAccessException {
         Collection<GameData> games = sessionDAO.listGames();
         return new ListGameResult(games);
     }
 
-    public void joinGame(JoinGameRequest joinGameRequest)
-    {
+    public void joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
         GameData game = getGame(joinGameRequest.gameID());
         if (game == null){
             throw new GameNotFoundException("Supplied gameID does not exist in database");

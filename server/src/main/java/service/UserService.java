@@ -11,7 +11,7 @@ public class UserService {
         sessionDao = sessionDAO;
     }
 
-    public RegisterResult register(RegisterRequest req) throws AlreadyTakenException {
+    public RegisterResult register(RegisterRequest req) throws AlreadyTakenException, DataAccessException {
         UserData user = sessionDao.getUserWUsername(req.username());
         if (user != null)
         {
@@ -24,14 +24,14 @@ public class UserService {
         return new RegisterResult(newAuthData.username(), newAuthData.authToken());
     }
 
-    private AuthData createAndSaveAuthToken(String username) {
+    private AuthData createAndSaveAuthToken(String username) throws DataAccessException {
         String authToken = generateToken();
         AuthData newAuthData = new AuthData(authToken, username);
         sessionDao.createAuth(newAuthData);
         return newAuthData;
     }
 
-    public LoginResult login(LoginRequest req) throws UserNotFoundException {
+    public LoginResult login(LoginRequest req) throws UserNotFoundException, DataAccessException {
         UserData user = sessionDao.getUserWUsername(req.username());
         if (user == null)
         {
@@ -45,7 +45,7 @@ public class UserService {
         return new LoginResult(newAuthData.username(), newAuthData.authToken());
     }
 
-    public void logout(LogoutRequest req) throws UnauthorizedException {
+    public void logout(LogoutRequest req) throws UnauthorizedException, DataAccessException {
         authenticateUser(req.authToken());
         sessionDao.deleteAuth(req.authToken());
     }
@@ -54,7 +54,7 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
-    public void authenticateUser(String authToken) {
+    public void authenticateUser(String authToken) throws DataAccessException {
         AuthData authData = sessionDao.getAuth(authToken);
         if (authData == null)
         {

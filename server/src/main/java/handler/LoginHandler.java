@@ -20,6 +20,7 @@ public class LoginHandler implements Handler {
     public void handle(@NotNull Context context) throws Exception {
         LoginRequest loginRequest = null;
         try {
+            
             var body = context.body();
             loginRequest = new Gson().fromJson(body, LoginRequest.class);
         }

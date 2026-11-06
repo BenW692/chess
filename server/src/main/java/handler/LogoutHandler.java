@@ -21,6 +21,7 @@ public class LogoutHandler implements Handler {
     public void handle(@NotNull Context context) throws Exception {
         LogoutRequest logoutRequest = null;
         try {
+            
             var header = context.header("authorization");
             logoutRequest = new LogoutRequest(header);
         }

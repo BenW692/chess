@@ -1,9 +1,6 @@
 package service;
 
-import dataaccess.AlreadyTakenException;
-import dataaccess.LocalSessionDAO;
-import dataaccess.UnauthorizedException;
-import dataaccess.UserNotFoundException;
+import dataaccess.*;
 import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +36,7 @@ class UserServiceTest {
     }
 
     @Test
-    void goodRegister() {
+    void goodRegister() throws DataAccessException {
         RegisterRequest tempRegisterRequest = new RegisterRequest(tempUserData.username(),
                 tempUserData.password(), tempUserData.email());
         userService.register(tempRegisterRequest);
@@ -59,7 +56,7 @@ class UserServiceTest {
     }
 
     @Test
-    void goodLogin() {
+    void goodLogin() throws DataAccessException {
         sessionDao.createUser(tempUserData);
         LoginRequest loginRequest = new LoginRequest(tempUserData.username(), tempUserData.password());
         LoginResult loginResult = userService.login(loginRequest);
@@ -74,7 +71,7 @@ class UserServiceTest {
     }
 
     @Test
-    void goodLogout() {
+    void goodLogout() throws DataAccessException {
         RegisterRequest tempRegisterRequest = new RegisterRequest(tempUserData.username(),
                 tempUserData.password(), tempUserData.email());
         String authToken = userService.register(tempRegisterRequest).authToken();
@@ -91,7 +88,7 @@ class UserServiceTest {
     }
 
     @Test
-    void goodAuthenticateUser() {
+    void goodAuthenticateUser() throws DataAccessException {
         RegisterRequest tempRegisterRequest = new RegisterRequest(tempUserData.username(),
                 tempUserData.password(), tempUserData.email());
         String authToken = userService.register(tempRegisterRequest).authToken();

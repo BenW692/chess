@@ -23,6 +23,7 @@ public class ListGamesHandler implements Handler {
     public void handle(@NotNull Context context) throws Exception {
         ListGameRequest listGameRequest = null;
         try {
+
             String header = context.header("authorization");
             listGameRequest = new ListGameRequest(header);
         }

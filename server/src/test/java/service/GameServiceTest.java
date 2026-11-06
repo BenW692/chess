@@ -1,9 +1,6 @@
 package service;
 
-import dataaccess.AlreadyTakenException;
-import dataaccess.GameNotFoundException;
-import dataaccess.LocalSessionDAO;
-import dataaccess.UnauthorizedException;
+import dataaccess.*;
 import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +17,7 @@ class GameServiceTest {
     String tempAuthToken;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws DataAccessException {
         sessionDao = new LocalSessionDAO();
         userService = new UserService(sessionDao);
         gameService = new GameService(sessionDao);
@@ -35,13 +32,13 @@ class GameServiceTest {
     }
 
     @Test
-    void createGame() {
+    void createGame() throws DataAccessException {
         CreateGameResult result = gameService.createGame(createGameRequest);
         assertNotNull(sessionDao.getGame(result.gameID()));
     }
 
     @Test
-    void listGames() {
+    void listGames() throws DataAccessException {
         gameService.createGame(createGameRequest);
         ListGameResult result = gameService.listGames();
         assertFalse(result.games().isEmpty());
@@ -54,7 +51,7 @@ class GameServiceTest {
     }
 
     @Test
-    void unavailableJoinGame() {
+    void unavailableJoinGame() throws DataAccessException {
         CreateGameResult res = gameService.createGame(createGameRequest);
         JoinGameRequest req = new JoinGameRequest(tempAuthToken, "WHITE", res.gameID());
         gameService.joinGame(req);
@@ -65,13 +62,13 @@ class GameServiceTest {
     }
 
     @Test
-    void goodJoinGame() {
+    void goodJoinGame() throws DataAccessException {
         CreateGameResult res = gameService.createGame(createGameRequest);
         JoinGameRequest req = new JoinGameRequest(tempAuthToken, "WHITE", res.gameID());
         gameService.joinGame(req);
     }
 
-    String createTempUser() {
+    String createTempUser() throws DataAccessException {
         RegisterRequest tempRegisterRequest = new RegisterRequest(tempUserData.username(),
                 tempUserData.password(), tempUserData.email());
         return userService.register(tempRegisterRequest).authToken();

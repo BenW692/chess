@@ -13,6 +13,16 @@ public class LocalSessionDAO implements SessionDAO {
     Map<Integer, GameData> gameMap = new HashMap<>(); //gameID, gameData
 
     @Override
+    public void setDatabaseConnection(boolean bool) {
+
+    }
+
+    @Override
+    public boolean checkDatabaseConnection() {
+        return true;
+    }
+
+    @Override
     public void createUser(UserData userData) {
         userMap.put(userData.username(), userData);
     }
