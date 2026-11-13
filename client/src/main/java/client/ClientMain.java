@@ -90,6 +90,7 @@ public class ClientMain {
           String[] params =  line.split(" ");
           if (params.length != 4)
           {
+              out.print(SET_TEXT_COLOR_RED);
               helpMSG = " Register parameters were not entered correctly. Please follow this syntax:\n" +
                       "   register <USERNAME> <PASSWORD> <EMAIL> - to create an account\n";
           }
@@ -100,6 +101,7 @@ public class ClientMain {
             // send this list to server facade
             if (params.length != 3)
             {
+                out.print(SET_TEXT_COLOR_RED);
                 helpMSG = " Login parameters were not entered correctly. Please follow this syntax:\n" +
                         "   login <USERNAME> <PASSWORD> - to play chess\n";
             }
@@ -120,7 +122,7 @@ public class ClientMain {
             return false;
         }
         else if (line.equalsIgnoreCase("help")) {
-            helpMSG = "Now that you are logged in these are the available commands:\n " +
+            helpMSG = "Now that you are logged in these are the available commands:\n" +
                     "   create <NAME> - creates a new game\n" +
                     "   list - list all games\n" +
                     "   join <ID> [WHITE or BLACK] - join a game as the specified team color\n" +
@@ -133,6 +135,7 @@ public class ClientMain {
             String[] params =  line.split(" ");
             if (params.length != 2)
             {
+                out.print(SET_TEXT_COLOR_RED);
                 helpMSG = " Create parameters were not entered correctly. Please follow this syntax:\n" +
                         "   create <NAME> - creates a new game\n";
             }
@@ -143,22 +146,31 @@ public class ClientMain {
             // send this list to server facade
             if (params.length != 3)
             {
+                out.print(SET_TEXT_COLOR_RED);
                 helpMSG = " Join parameters were not entered correctly. Please follow this syntax:\n" +
                         "   join <ID> [WHITE or BLACK] - join a game as the specified team color\n";
             }
-            if (params[2].equalsIgnoreCase("white")) {userTeamColor = ChessGame.TeamColor.WHITE;}
-            else {userTeamColor = ChessGame.TeamColor.BLACK;}
-            clientState = ClientState.DISPLAYGAME;
+            else {
+                if (params[2].equalsIgnoreCase("white")) {
+                    userTeamColor = ChessGame.TeamColor.WHITE;
+                } else {
+                    userTeamColor = ChessGame.TeamColor.BLACK;
+                }
+                clientState = ClientState.DISPLAYGAME;
+            }
         }
         else if (line.startsWith("observe")){
             String[] params =  line.split(" ");
             if (params.length != 2)
             {
+                out.print(SET_TEXT_COLOR_RED);
                 helpMSG = " Observe parameters were not entered correctly. Please follow this syntax:\n" +
                         "   observe <ID> - observe the specified game\n";
             }
-            userTeamColor = ChessGame.TeamColor.WHITE;
-            clientState = ClientState.DISPLAYGAME;
+            else {
+                userTeamColor = ChessGame.TeamColor.WHITE;
+                clientState = ClientState.DISPLAYGAME;
+            }
         }
         else if (line.equalsIgnoreCase("logout")){
             clientState = ClientState.LOGGEDOUT;
@@ -297,11 +309,6 @@ public class ClientMain {
     private static void setLightGray(PrintStream out) {
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
-    }
-
-    private static void setRed(PrintStream out) {
-        out.print(SET_BG_COLOR_RED);
-        out.print(SET_TEXT_COLOR_RED);
     }
 
     private static void setDarkGray(PrintStream out) {
