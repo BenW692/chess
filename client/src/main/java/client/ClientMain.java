@@ -1,5 +1,10 @@
 package client;
 
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
+
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -8,6 +13,8 @@ import java.util.Random;
 import static ui.EscapeSequences.*;
 
 public class ClientMain {
+    private static ChessBoard gameBoard;
+
 //    public static void main(String[] args) {
 //        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
 //        System.out.println("♕ 240 Chess Client: " + piece);
@@ -19,19 +26,18 @@ public class ClientMain {
     private static final int LINE_WIDTH_IN_PADDED_CHARS = 0;
 
     // Padded characters.
-    private static final String EMPTY = "   ";
-    private static final String X = " X ";
-    private static final String O = " O ";
-
-    private static Random rand = new Random();
+    private static final String THREESPACES = "   ";
 
 
     public static void main(String[] args) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        gameBoard = new ChessBoard();
+        gameBoard.resetBoard();
 
         out.print(ERASE_SCREEN);
 
         drawColDescr(out);
+
 
         drawChessBoard(out);
 
@@ -44,16 +50,16 @@ public class ClientMain {
     private static void drawColDescr(PrintStream out) {
 
         setDarkGreen(out);
-        out.print(EMPTY);
+        out.print(THREESPACES);
         String[] headers = {" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
         for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
             drawHeader(out, headers[boardCol]);
 
             if (boardCol < BOARD_SIZE_IN_SQUARES - 1) {
-                out.print(EMPTY.repeat(LINE_WIDTH_IN_PADDED_CHARS));
+                out.print(THREESPACES.repeat(LINE_WIDTH_IN_PADDED_CHARS));
             }
         }
-        out.print(EMPTY);
+        out.print(THREESPACES);
         setBlack(out);
         out.println();
     }
@@ -62,30 +68,15 @@ public class ClientMain {
         int prefixLength = SQUARE_SIZE_IN_PADDED_CHARS / 2;
         int suffixLength = SQUARE_SIZE_IN_PADDED_CHARS / 2;
 
-        out.print(EMPTY.repeat(prefixLength));
-        printHeaderText(out, headerText);
-        out.print(EMPTY.repeat(suffixLength));
-    }
-
-    private static void printHeaderText(PrintStream out, String player) {
-//        out.print(SET_BG_COLOR_BLACK);
-//        out.print(SET_TEXT_COLOR_GREEN);
-
-        out.print(player);
-
-//        setBlack(out);
+        out.print(THREESPACES.repeat(prefixLength));
+        out.print(headerText);
+        out.print(THREESPACES.repeat(suffixLength));
     }
 
     private static void drawChessBoard(PrintStream out) {
 
         for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
             drawRowOfSquares(out, boardRow);
-
-            if (boardRow < BOARD_SIZE_IN_SQUARES - 1) {
-                // Draw horizontal row separator.
-                drawHorizontalLine(out);
-                setDarkGray(out);
-            }
         }
     }
 
@@ -98,7 +89,7 @@ public class ClientMain {
                     if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
                         out.print(rowInd.get(boardRow));
                     }
-                    else {out.print(EMPTY);}
+                    else {out.print(THREESPACES);}
                 }
                 else {
                     int boardRowType = boardRow % 2;
@@ -115,17 +106,17 @@ public class ClientMain {
                             setLightGray(out);
                         }
                     }
-//                out.print(EMPTY.repeat(SQUARE_SIZE_IN_PADDED_CHARS));
 
                     if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
                         int prefixLength = SQUARE_SIZE_IN_PADDED_CHARS / 2;
                         int suffixLength = SQUARE_SIZE_IN_PADDED_CHARS / 2;
-
-                        out.print(EMPTY.repeat(prefixLength));
-                        printPlayer(out, rand.nextBoolean() ? X : O);
-                        out.print(EMPTY.repeat(suffixLength));
+                        out.print(THREESPACES.repeat(prefixLength));
+                        // we have to subtract 1 off the column for the first col that is the number label
+                        placePiece(out, boardRow, boardCol-1);
+                        out.print(THREESPACES.repeat(suffixLength));
                     } else {
-                        out.print(EMPTY.repeat(SQUARE_SIZE_IN_PADDED_CHARS));
+                        out.print(THREESPACES.repeat(SQUARE_SIZE_IN_PADDED_CHARS));
+
                     }
                 }
                 setBlack(out);
@@ -134,17 +125,17 @@ public class ClientMain {
         }
     }
 
-    private static void drawHorizontalLine(PrintStream out) {
-
-        int boardSizeInSpaces = BOARD_SIZE_IN_SQUARES * SQUARE_SIZE_IN_PADDED_CHARS +
-                (BOARD_SIZE_IN_SQUARES - 1) * LINE_WIDTH_IN_PADDED_CHARS;
-
-        for (int lineRow = 0; lineRow < LINE_WIDTH_IN_PADDED_CHARS; ++lineRow) {
-            setRed(out);
-            out.print(EMPTY.repeat(boardSizeInSpaces));
-
-            setDarkGray(out);
-            out.println();
+    private static void placePiece(PrintStream out, int boardRow, int boardCol) {
+        ChessPiece chessPiece = gameBoard.getPiece(new ChessPosition(boardRow+1, boardCol+1));
+        if (chessPiece == null){
+            out.print("   ");
+        }
+        else {
+            if (chessPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                out.print(SET_TEXT_COLOR_WHITE);
+            }
+            else {out.print(SET_TEXT_COLOR_BLACK);}
+            out.print(" " + chessPiece.toString().toUpperCase().charAt(1) + " ");
         }
     }
 
@@ -173,12 +164,4 @@ public class ClientMain {
         out.print(SET_TEXT_COLOR_BLACK);
     }
 
-    private static void printPlayer(PrintStream out, String player) {
-//        out.print(SET_BG_COLOR_WHITE);
-//        out.print(SET_TEXT_COLOR_BLACK);
-
-        out.print(player);
-
-//        setLightGray(out);
-    }
 }
