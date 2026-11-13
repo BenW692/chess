@@ -13,10 +13,15 @@ import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
 public class ClientMain {
-    private static boolean userLoggedIn = false;
+
+    enum ClientState {
+        LOGGEDOUT,
+        LOGGEDIN,
+        DISPLAYGAME
+    }
 
     private static ChessBoard gameBoard;
-
+    private static ClientState clientState = ClientState.LOGGEDOUT;;
 //    public static void main(String[] args) {
 //        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
 //        System.out.println("♕ 240 Chess Client: " + piece);
@@ -30,45 +35,160 @@ public class ClientMain {
     // Padded characters.
     private static final String THREESPACES = "   ";
 
-
     public static void main(String[] args) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        out.println("♕ Welcome to 240 Chess. Type Help to get started");
+        out.println("♕ Welcome to 240 Chess. Type help to see how gameplay work");
         Scanner scanner = new Scanner(System.in);
-        while (!userLoggedIn) {
-            out.print(RESET_TEXT_COLOR);
-            out.print("[LOGGED_OUT]>>> ");
+        stateMachineHandler(out, scanner);
+    }
 
-            String line = scanner.nextLine();
-            if (line.equalsIgnoreCase("exit")) {
-                break;
+    private static void stateMachineHandler(PrintStream out, Scanner scanner) {
+        while (true) {
+            switch (clientState) {
+                case ClientState.LOGGEDOUT -> {
+                    if (!loggedOutUI(out, scanner)) {
+                        return;
+                    }
+                }
+                case ClientState.LOGGEDIN -> {
+                    if (!loggedInUI(out, scanner)) {
+                        return;
+                    }
+                }
+                case ClientState.DISPLAYGAME -> {
+                    gameBoard = new ChessBoard();
+                    gameBoard.resetBoard();
+                    out.print(ERASE_SCREEN);
+                    drawColDescr(out);
+                    drawChessBoard(out);
+                    drawColDescr(out);
+                    out.print(SET_BG_COLOR_BLACK);
+                    out.print(SET_TEXT_COLOR_WHITE);
+                    if (!gameplayUI(out, scanner)) {
+                        return;
+                    }
+                }
             }
-            else if (line.equalsIgnoreCase("help")) {
-                out.print(SET_TEXT_COLOR_BLUE);
-                String helpMSG = "   register <USERNAME> <PASSWORD> <EMAIL> - to create an account\n" +
-                        "   login <USERNAME> <PASSWORD> - to play chess\n" +
-                        "   quit - playing chess\n" +
-                        "   help - with possible commands\n\n";
-                out.print(helpMSG);
-            }
-//
-//            var numbers = line.split(" ");
-//            int result = 0;
         }
-        gameBoard = new ChessBoard();
-        gameBoard.resetBoard();
+    }
 
-        out.print(ERASE_SCREEN);
+    private static boolean loggedOutUI(PrintStream out, Scanner scanner) {
+        out.print(RESET_TEXT_COLOR);
+        out.print("[LOGGED_OUT]>>> ");
 
-        drawColDescr(out);
+        String line = scanner.nextLine().toLowerCase();
+        out.print(SET_TEXT_COLOR_BLUE);
+        String helpMSG = "";
+        if (line.equalsIgnoreCase("quit")) {
+            return false;
+        }
+        else if (line.equalsIgnoreCase("help")) {
+            helpMSG = "Please create an account and/or login using the following commands:\n" +
+                    "   register <USERNAME> <PASSWORD> <EMAIL> - to create an account\n" +
+                    "   login <USERNAME> <PASSWORD> - to play chess\n" +
+                    "   quit - exit application\n" +
+                    "   help - description possible commands\n";
+        }
+        else if (line.startsWith("register")) {
+          String[] params =  line.split(" ");
+          if (params.length != 4)
+          {
+              helpMSG = " Register parameters were not entered correctly. Please follow this syntax:\n" +
+                      "   register <USERNAME> <PASSWORD> <EMAIL> - to create an account\n";
+          }
+          // send this list to server facade
+        }
+        else if (line.startsWith("login")) {
+            String[] params =  line.split(" ");
+            // send this list to server facade
+            if (params.length != 3)
+            {
+                helpMSG = " Login parameters were not entered correctly. Please follow this syntax:\n" +
+                        "   login <USERNAME> <PASSWORD> - to play chess\n";
+            }
+            else {clientState = ClientState.LOGGEDIN;}
+        }
+        out.print(helpMSG);
+        return true;
+    }
 
+    private static boolean loggedInUI(PrintStream out, Scanner scanner) {
+        out.print(RESET_TEXT_COLOR);
+        out.print("[LOGGED_IN]>>> ");
 
-        drawChessBoard(out);
+        String line = scanner.nextLine().toLowerCase();
+        out.print(SET_TEXT_COLOR_BLUE);
+        String helpMSG = "";
+        if (line.equalsIgnoreCase("quit")) {
+            return false;
+        }
+        else if (line.equalsIgnoreCase("help")) {
+            helpMSG = "Now that you are logged in these are the available commands:\n " +
+                    "   create <NAME> - creates a new game\n" +
+                    "   list - list all games\n" +
+                    "   join <ID> [WHITE or BLACK] - join a game as the specified team color\n" +
+                    "   observe <ID> - observe the specified game\n" +
+                    "   logout - to finish game play\n" +
+                    "   quit - exit application\n" +
+                    "   help - description possible commands\n";
+        }
+        else if (line.startsWith("create")) {
+            String[] params =  line.split(" ");
+            if (params.length != 2)
+            {
+                helpMSG = " Create parameters were not entered correctly. Please follow this syntax:\n" +
+                        "   create <NAME> - creates a new game\n";
+            }
+            // send this list to server facade
+        }
+        else if (line.startsWith("join")) {
+            String[] params =  line.split(" ");
+            // send this list to server facade
+            if (params.length != 3)
+            {
+                helpMSG = " Join parameters were not entered correctly. Please follow this syntax:\n" +
+                        "   join <ID> [WHITE or BLACK] - join a game as the specified team color\n";
+            }
+            clientState = ClientState.DISPLAYGAME;
+        }
+        else if (line.startsWith("observe")){
+            String[] params =  line.split(" ");
+            if (params.length != 2)
+            {
+                helpMSG = " Observe parameters were not entered correctly. Please follow this syntax:\n" +
+                        "   observe <ID> - observe the specified game\n";
+            }
+            clientState = ClientState.DISPLAYGAME;
+        }
+        else if (line.equalsIgnoreCase("logout")){
+            clientState = ClientState.LOGGEDOUT;
+        }
+        out.print(helpMSG);
+        return true;
+    }
 
-        drawColDescr(out);
+    private static boolean gameplayUI(PrintStream out, Scanner scanner) {
+        out.print(RESET_TEXT_COLOR);
+        out.print(RESET_BG_COLOR);
+        out.print("[GAMEPLAY]>>> ");
 
-        out.print(SET_BG_COLOR_BLACK);
-        out.print(SET_TEXT_COLOR_WHITE);
+        String line = scanner.nextLine().toLowerCase();
+        out.print(SET_TEXT_COLOR_BLUE);
+        String helpMSG = "";
+        if (line.equalsIgnoreCase("quit")) {
+            return false;
+        }
+        else if (line.equalsIgnoreCase("help")) {
+            helpMSG = "   This is where gameplay control will be implemented\n" +
+                    "   logout - to finish game play\n" +
+                    "   quit - exit application\n" +
+                    "   help - description possible commands\n";
+        }
+        else if (line.equalsIgnoreCase("logout")){
+            clientState = ClientState.LOGGEDOUT;
+        }
+        out.print(helpMSG);
+        return true;
     }
 
     private static void drawColDescr(PrintStream out) {
