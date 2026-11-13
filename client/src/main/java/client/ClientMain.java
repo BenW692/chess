@@ -21,11 +21,8 @@ public class ClientMain {
     }
 
     private static ChessBoard gameBoard;
-    private static ClientState clientState = ClientState.LOGGEDOUT;;
-//    public static void main(String[] args) {
-//        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-//        System.out.println("♕ 240 Chess Client: " + piece);
-//    }
+    private static ClientState clientState = ClientState.LOGGEDIN;;
+    private static ChessGame.TeamColor userTeamColor;
 
     // Board dimensions.
     private static final int BOARD_SIZE_IN_SQUARES = 8;
@@ -37,7 +34,7 @@ public class ClientMain {
 
     public static void main(String[] args) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        out.println("♕ Welcome to 240 Chess. Type help to see how gameplay work");
+        out.println("♕ Welcome to 240 Chess. Type help to see how gameplay works.");
         Scanner scanner = new Scanner(System.in);
         stateMachineHandler(out, scanner);
     }
@@ -149,6 +146,8 @@ public class ClientMain {
                 helpMSG = " Join parameters were not entered correctly. Please follow this syntax:\n" +
                         "   join <ID> [WHITE or BLACK] - join a game as the specified team color\n";
             }
+            if (params[2].equalsIgnoreCase("white")) {userTeamColor = ChessGame.TeamColor.WHITE;}
+            else {userTeamColor = ChessGame.TeamColor.BLACK;}
             clientState = ClientState.DISPLAYGAME;
         }
         else if (line.startsWith("observe")){
@@ -158,6 +157,7 @@ public class ClientMain {
                 helpMSG = " Observe parameters were not entered correctly. Please follow this syntax:\n" +
                         "   observe <ID> - observe the specified game\n";
             }
+            userTeamColor = ChessGame.TeamColor.WHITE;
             clientState = ClientState.DISPLAYGAME;
         }
         else if (line.equalsIgnoreCase("logout")){
@@ -197,8 +197,10 @@ public class ClientMain {
         out.print(THREESPACES);
         String[] headers = {" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
         for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
-            drawHeader(out, headers[boardCol]);
-
+            if (userTeamColor == ChessGame.TeamColor.WHITE){
+                drawHeader(out, headers[boardCol]);
+            }
+            else {drawHeader(out, headers[BOARD_SIZE_IN_SQUARES - 1 - boardCol]);}
             if (boardCol < BOARD_SIZE_IN_SQUARES - 1) {
                 out.print(THREESPACES.repeat(LINE_WIDTH_IN_PADDED_CHARS));
             }
@@ -231,7 +233,10 @@ public class ClientMain {
                 if (boardCol == 0 || boardCol == BOARD_SIZE_IN_SQUARES+1){
                     setDarkGreen(out);
                     if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
-                        out.print(rowInd.get(boardRow));
+                        if (userTeamColor == ChessGame.TeamColor.WHITE) {
+                            out.print(rowInd.get(boardRow));
+                        }
+                        else {out.print(rowInd.get(BOARD_SIZE_IN_SQUARES - 1 - boardRow));}
                     }
                     else {out.print(THREESPACES);}
                 }
@@ -270,7 +275,13 @@ public class ClientMain {
     }
 
     private static void placePiece(PrintStream out, int boardRow, int boardCol) {
-        ChessPiece chessPiece = gameBoard.getPiece(new ChessPosition(boardRow+1, boardCol+1));
+        ChessPiece chessPiece = null;
+        if (userTeamColor == ChessGame.TeamColor.BLACK) {
+            chessPiece = gameBoard.getPiece(new ChessPosition(boardRow+1, 8 - boardCol));
+        }
+        else {
+            chessPiece = gameBoard.getPiece(new ChessPosition(8 - boardRow, boardCol+1));
+        }
         if (chessPiece == null){
             out.print("   ");
         }
