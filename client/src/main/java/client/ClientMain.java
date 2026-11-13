@@ -8,11 +8,13 @@ import chess.ChessPosition;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Random;
+import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
 public class ClientMain {
+    private static boolean userLoggedIn = false;
+
     private static ChessBoard gameBoard;
 
 //    public static void main(String[] args) {
@@ -31,6 +33,28 @@ public class ClientMain {
 
     public static void main(String[] args) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        out.println("♕ Welcome to 240 Chess. Type Help to get started");
+        Scanner scanner = new Scanner(System.in);
+        while (!userLoggedIn) {
+            out.print(RESET_TEXT_COLOR);
+            out.print("[LOGGED_OUT]>>> ");
+
+            String line = scanner.nextLine();
+            if (line.equalsIgnoreCase("exit")) {
+                break;
+            }
+            else if (line.equalsIgnoreCase("help")) {
+                out.print(SET_TEXT_COLOR_BLUE);
+                String helpMSG = "   register <USERNAME> <PASSWORD> <EMAIL> - to create an account\n" +
+                        "   login <USERNAME> <PASSWORD> - to play chess\n" +
+                        "   quit - playing chess\n" +
+                        "   help - with possible commands\n\n";
+                out.print(helpMSG);
+            }
+//
+//            var numbers = line.split(" ");
+//            int result = 0;
+        }
         gameBoard = new ChessBoard();
         gameBoard.resetBoard();
 
