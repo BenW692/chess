@@ -4,6 +4,8 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import model.LoginRequest;
 import model.RegisterRequest;
 
@@ -159,7 +161,18 @@ public class ClientMain {
                 response = new String[]{"Create parameters were not entered correctly. Please follow this syntax:",
                         "create <NAME> - creates a new game"};
             }
-            // send this list to server facade
+            else {
+                client.HTTPRequestResponse reqResponse = serverFacade.createGame(params[1]);
+                if (!reqResponse.success()) {
+                    out.print(SET_TEXT_COLOR_RED);
+                    response = new String[]{reqResponse.message()};
+                }
+                else {
+                    JsonObject httpBody = JsonParser.parseString(reqResponse.httpBody()).getAsJsonObject();
+                    String gameID = httpBody.get("gameID").getAsString();
+                    response = new String[]{reqResponse.message(), "The gameID on the game you just created is: " + gameID};
+                }
+            }
         }
         else if (line.startsWith("join")) {
             String[] params =  line.split(" ");

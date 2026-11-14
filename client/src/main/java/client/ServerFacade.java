@@ -13,6 +13,7 @@ import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import model.CreateGameRequest;
 import model.LoginRequest;
 import model.RegisterRequest;
 
@@ -20,6 +21,8 @@ public class ServerFacade {
     String host;
     long port;
     String currUserAuthToken = "";
+    Map<String, String> header = new HashMap<>();
+    private record CreateGameRequest(String gameName) {}
 
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
@@ -45,7 +48,6 @@ public class ServerFacade {
             }
             if (httpBody != null) {
                 body = new Gson().toJson(httpBody);
-
             }
             switch (httpMethod.toLowerCase()) {
                 case "post" -> {
@@ -97,21 +99,23 @@ public class ServerFacade {
 
     public HTTPRequestResponse login(LoginRequest loginReq) {
         HTTPRequestResponse response = sendHTTPRequest(loginReq, null, "/session", "post");
+        // TODO: this crashed the program when the password was wrong
         JsonObject httpBody = JsonParser.parseString(response.httpBody()).getAsJsonObject();
         currUserAuthToken = httpBody.get("authToken").getAsString();
+        header.put("authorization", currUserAuthToken);
         return response;
     }
 
     public HTTPRequestResponse logout() {
-        Map<String, String> header = new HashMap<>();
-        header.put("authorization", currUserAuthToken);
         return sendHTTPRequest(null, header, "/session", "delete");
     }
+
     public void listGames() {
 
     }
-    public void createGame() {
-
+    public HTTPRequestResponse createGame(String gameName) {
+        CreateGameRequest body = new CreateGameRequest(gameName);
+        return sendHTTPRequest(body, header, "/game", "post");
     }
     public void joinGame() {
 
