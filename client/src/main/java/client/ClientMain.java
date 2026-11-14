@@ -6,6 +6,7 @@ import chess.ChessPiece;
 import chess.ChessPosition;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import model.JoinGameRequest;
 import model.LoginRequest;
 import model.RegisterRequest;
 
@@ -189,7 +190,13 @@ public class ClientMain {
                 } else {
                     userTeamColor = ChessGame.TeamColor.BLACK;
                 }
-                clientState = ClientState.DISPLAYGAME;
+                int gameID = Integer.parseInt(params[1]);
+                client.HTTPRequestResponse reqResponse = serverFacade.joinGame(params[2], gameID);
+                if (!reqResponse.success()) {
+                    out.print(SET_TEXT_COLOR_RED);
+                }
+                else {clientState = ClientState.DISPLAYGAME;}
+                response = new String[]{reqResponse.message()};
             }
         }
         else if (line.startsWith("observe")){
@@ -235,7 +242,12 @@ public class ClientMain {
                     "help - description possible commands"};
         }
         else if (line.equalsIgnoreCase("logout")){
-            clientState = ClientState.LOGGEDOUT;
+            client.HTTPRequestResponse reqResponse = serverFacade.logout();
+            if (!reqResponse.success()) {
+                out.print(SET_TEXT_COLOR_RED);
+            }
+            else {clientState = ClientState.LOGGEDOUT;}
+            response = new String[]{reqResponse.message()};
         }
         printWIndent(out, response);
         return true;

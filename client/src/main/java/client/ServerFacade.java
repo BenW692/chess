@@ -10,10 +10,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import model.CreateGameRequest;
 import model.LoginRequest;
 import model.RegisterRequest;
 
@@ -22,7 +22,8 @@ public class ServerFacade {
     long port;
     String currUserAuthToken = "";
     Map<String, String> header = new HashMap<>();
-    private record CreateGameRequest(String gameName) {}
+    private record CreateGameHttpRequest(String gameName) {}
+    private record JoinGameHttpRequest(String playerColor, int gameID) {}
 
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
@@ -114,12 +115,15 @@ public class ServerFacade {
 
     }
     public HTTPRequestResponse createGame(String gameName) {
-        CreateGameRequest body = new CreateGameRequest(gameName);
+        CreateGameHttpRequest body = new CreateGameHttpRequest(gameName);
         return sendHTTPRequest(body, header, "/game", "post");
     }
-    public void joinGame() {
 
+    public HTTPRequestResponse joinGame(String playerColor, int gameID) {
+        JoinGameHttpRequest gameReq = new JoinGameHttpRequest(playerColor.toUpperCase(), gameID);
+        return sendHTTPRequest(gameReq, header, "/game", "put");
     }
+
     public void observeGame() {
 
     }
