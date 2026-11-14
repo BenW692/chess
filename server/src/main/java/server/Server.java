@@ -12,7 +12,6 @@ import java.util.Map;
 public class Server {
     public SessionDAO sessionDAO;
     private final Javalin javalin;
-    private boolean databaseConnection;
 
     public Server ()
     {

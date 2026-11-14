@@ -4,6 +4,7 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import model.RegisterRequest;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -19,9 +20,10 @@ public class ClientMain {
         LOGGEDIN,
         DISPLAYGAME
     }
-
+    //server facade instance
+    private static ServerFacade serverFacade;
     private static ChessBoard gameBoard;
-    private static ClientState clientState = ClientState.LOGGEDIN;;
+    private static ClientState clientState = ClientState.LOGGEDOUT;;
     private static ChessGame.TeamColor userTeamColor;
 
     // Board dimensions.
@@ -32,11 +34,14 @@ public class ClientMain {
     // Padded characters.
     private static final String THREESPACES = "   ";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        // create an instance of server facade and create an http client
+        serverFacade = new ServerFacade("localhost", 8080);
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.println("♕ Welcome to 240 Chess. Type help to see how gameplay works.");
         Scanner scanner = new Scanner(System.in);
         stateMachineHandler(out, scanner);
+        serverFacade.clearApp();
     }
 
     private static void stateMachineHandler(PrintStream out, Scanner scanner) {
@@ -75,26 +80,33 @@ public class ClientMain {
 
         String line = scanner.nextLine().toLowerCase();
         out.print(SET_TEXT_COLOR_BLUE);
-        String helpMSG = "";
+        String[] response = {};
         if (line.equalsIgnoreCase("quit")) {
             return false;
         }
         else if (line.equalsIgnoreCase("help")) {
-            helpMSG = "Please create an account and/or login using the following commands:\n" +
-                    "   register <USERNAME> <PASSWORD> <EMAIL> - to create an account\n" +
-                    "   login <USERNAME> <PASSWORD> - to play chess\n" +
-                    "   quit - exit application\n" +
-                    "   help - description possible commands\n";
+            response = new String[]{"Please create an account and/or login using the following commands:",
+                            "register <USERNAME> <PASSWORD> <EMAIL> - to create an account", 
+                            "login <USERNAME> <PASSWORD> - to play chess", 
+                            "quit - exit application", 
+                            "help - description possible commands"};
         }
         else if (line.startsWith("register")) {
-          String[] params =  line.split(" ");
-          if (params.length != 4)
-          {
-              out.print(SET_TEXT_COLOR_RED);
-              helpMSG = " Register parameters were not entered correctly. Please follow this syntax:\n" +
-                      "   register <USERNAME> <PASSWORD> <EMAIL> - to create an account\n";
-          }
-          // send this list to server facade
+            String[] params =  line.split(" ");
+            if (params.length != 4)
+            {
+                out.print(SET_TEXT_COLOR_RED);
+                response = new String[]{"Register parameters were not entered correctly. Please follow this syntax:",
+                      "register <USERNAME> <PASSWORD> <EMAIL> - to create an account"};
+            }
+            // send this list to server facade
+            else {
+                client.HTTPRequestResponse reqResponse = serverFacade.register(new RegisterRequest(params[1], params[2], params[3]));
+                if (!reqResponse.success()) {
+                    out.print(SET_TEXT_COLOR_RED);
+                }
+                response = new String[]{reqResponse.message()};
+            }
         }
         else if (line.startsWith("login")) {
             String[] params =  line.split(" ");
@@ -102,12 +114,12 @@ public class ClientMain {
             if (params.length != 3)
             {
                 out.print(SET_TEXT_COLOR_RED);
-                helpMSG = " Login parameters were not entered correctly. Please follow this syntax:\n" +
-                        "   login <USERNAME> <PASSWORD> - to play chess\n";
+                response = new String[]{"Login parameters were not entered correctly. Please follow this syntax:",
+                        "login <USERNAME> <PASSWORD> - to play chess"};
             }
             else {clientState = ClientState.LOGGEDIN;}
         }
-        out.print(helpMSG);
+        printWIndent(out, response);
         return true;
     }
 
@@ -117,27 +129,27 @@ public class ClientMain {
 
         String line = scanner.nextLine().toLowerCase();
         out.print(SET_TEXT_COLOR_BLUE);
-        String helpMSG = "";
+        String[] response = new String[]{""};
         if (line.equalsIgnoreCase("quit")) {
             return false;
         }
         else if (line.equalsIgnoreCase("help")) {
-            helpMSG = "Now that you are logged in these are the available commands:\n" +
-                    "   create <NAME> - creates a new game\n" +
-                    "   list - list all games\n" +
-                    "   join <ID> [WHITE or BLACK] - join a game as the specified team color\n" +
-                    "   observe <ID> - observe the specified game\n" +
-                    "   logout - to finish game play\n" +
-                    "   quit - exit application\n" +
-                    "   help - description possible commands\n";
+            response = new String[]{"Now that you are logged in these are the available commands:",
+                    "create <NAME> - creates a new game",
+                    "list - list all games",
+                    "join <ID> [WHITE or BLACK] - join a game as the specified team color",
+                    "observe <ID> - observe the specified game",
+                    "logout - to finish game play",
+                    "quit - exit application",
+                    "help - description possible commands"};
         }
         else if (line.startsWith("create")) {
             String[] params =  line.split(" ");
             if (params.length != 2)
             {
                 out.print(SET_TEXT_COLOR_RED);
-                helpMSG = " Create parameters were not entered correctly. Please follow this syntax:\n" +
-                        "   create <NAME> - creates a new game\n";
+                response = new String[]{"Create parameters were not entered correctly. Please follow this syntax:",
+                        "create <NAME> - creates a new game"};
             }
             // send this list to server facade
         }
@@ -147,8 +159,8 @@ public class ClientMain {
             if (params.length != 3)
             {
                 out.print(SET_TEXT_COLOR_RED);
-                helpMSG = " Join parameters were not entered correctly. Please follow this syntax:\n" +
-                        "   join <ID> [WHITE or BLACK] - join a game as the specified team color\n";
+                response = new String[]{"Join parameters were not entered correctly. Please follow this syntax:",
+                        "join <ID> [WHITE or BLACK] - join a game as the specified team color"};
             }
             else {
                 if (params[2].equalsIgnoreCase("white")) {
@@ -164,8 +176,8 @@ public class ClientMain {
             if (params.length != 2)
             {
                 out.print(SET_TEXT_COLOR_RED);
-                helpMSG = " Observe parameters were not entered correctly. Please follow this syntax:\n" +
-                        "   observe <ID> - observe the specified game\n";
+                response = new String[]{"Observe parameters were not entered correctly. Please follow this syntax:",
+                        "observe <ID> - observe the specified game"};
             }
             else {
                 userTeamColor = ChessGame.TeamColor.WHITE;
@@ -175,7 +187,7 @@ public class ClientMain {
         else if (line.equalsIgnoreCase("logout")){
             clientState = ClientState.LOGGEDOUT;
         }
-        out.print(helpMSG);
+        printWIndent(out, response);
         return true;
     }
 
@@ -186,20 +198,20 @@ public class ClientMain {
 
         String line = scanner.nextLine().toLowerCase();
         out.print(SET_TEXT_COLOR_BLUE);
-        String helpMSG = "";
+        String[] response = new String[]{""};
         if (line.equalsIgnoreCase("quit")) {
             return false;
         }
         else if (line.equalsIgnoreCase("help")) {
-            helpMSG = "   This is where gameplay control will be implemented\n" +
-                    "   logout - to finish game play\n" +
-                    "   quit - exit application\n" +
-                    "   help - description possible commands\n";
+            response = new String[]{"This is where gameplay control will be implemented",
+                    "logout - to finish game play",
+                    "quit - exit application",
+                    "help - description possible commands"};
         }
         else if (line.equalsIgnoreCase("logout")){
             clientState = ClientState.LOGGEDOUT;
         }
-        out.print(helpMSG);
+        printWIndent(out, response);
         return true;
     }
 
@@ -324,6 +336,12 @@ public class ClientMain {
     private static void setBlack(PrintStream out) {
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_BLACK);
+    }
+    
+    private static void printWIndent(PrintStream out, String[] msg) {
+        for (var line : msg){
+            out.print("   " + line + "\n");
+        }
     }
 
 }
