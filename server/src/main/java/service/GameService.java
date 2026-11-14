@@ -38,12 +38,12 @@ public class GameService {
     private void checkGameAvailability(GameData game, String playerColor) {
         if (playerColor.equalsIgnoreCase("white")) {
             if (game.whiteUsername() != null){
-                throw new AlreadyTakenException("Already taken");
+                throw new AlreadyTakenException("the white player user is already taken");
             }
         }
         else {
             if (game.blackUsername() != null){
-                throw new AlreadyTakenException("Already taken");
+                throw new AlreadyTakenException("the black player user is already taken");
             }
         }
     }

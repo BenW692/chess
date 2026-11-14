@@ -1,4 +1,4 @@
 package client;
 
-public record HTTPRequestResponse(boolean success, String message) {
+public record HTTPRequestResponse(boolean success, String message, String httpBody) {
 }

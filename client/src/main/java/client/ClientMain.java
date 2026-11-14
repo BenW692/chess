@@ -4,6 +4,7 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import model.LoginRequest;
 import model.RegisterRequest;
 
 import java.io.PrintStream;
@@ -117,7 +118,14 @@ public class ClientMain {
                 response = new String[]{"Login parameters were not entered correctly. Please follow this syntax:",
                         "login <USERNAME> <PASSWORD> - to play chess"};
             }
-            else {clientState = ClientState.LOGGEDIN;}
+            else {
+                client.HTTPRequestResponse reqResponse = serverFacade.login(new LoginRequest(params[1], params[2]));
+                if (!reqResponse.success()) {
+                    out.print(SET_TEXT_COLOR_RED);
+                }
+                else {clientState = ClientState.LOGGEDIN;}
+                response = new String[]{reqResponse.message()};
+            }
         }
         printWIndent(out, response);
         return true;
@@ -185,7 +193,12 @@ public class ClientMain {
             }
         }
         else if (line.equalsIgnoreCase("logout")){
-            clientState = ClientState.LOGGEDOUT;
+            client.HTTPRequestResponse reqResponse = serverFacade.logout();
+            if (!reqResponse.success()) {
+                out.print(SET_TEXT_COLOR_RED);
+            }
+            else {clientState = ClientState.LOGGEDOUT;}
+            response = new String[]{reqResponse.message()};
         }
         printWIndent(out, response);
         return true;
