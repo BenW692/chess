@@ -4,16 +4,18 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+import model.GameData;
 import model.JoinGameRequest;
 import model.LoginRequest;
 import model.RegisterRequest;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 import static ui.EscapeSequences.*;
 
@@ -130,6 +132,10 @@ public class ClientMain {
                 response = new String[]{reqResponse.message()};
             }
         }
+        else {
+            out.print(SET_TEXT_COLOR_RED);
+            response = new String[]{"The command you entered is not a valid command. Please type help to see what the command options are."};
+        }
         printWIndent(out, response);
         return true;
     }
@@ -145,14 +151,14 @@ public class ClientMain {
             return false;
         }
         else if (line.equalsIgnoreCase("help")) {
-            response = new String[]{"Now that you are logged in these are the available commands:",
+            response = new String[]{"Now that you are logged in, these are the available commands:",
                     "create <NAME> - creates a new game",
                     "list - list all games",
                     "join <ID> [WHITE or BLACK] - join a game as the specified team color",
                     "observe <ID> - observe the specified game",
                     "logout - to finish game play",
                     "quit - exit application",
-                    "help - description possible commands"};
+                    "help - description of possible commands"};
         }
         else if (line.startsWith("create")) {
             String[] params =  line.split(" ");
@@ -190,13 +196,46 @@ public class ClientMain {
                 } else {
                     userTeamColor = ChessGame.TeamColor.BLACK;
                 }
-                int gameID = Integer.parseInt(params[1]);
-                client.HTTPRequestResponse reqResponse = serverFacade.joinGame(params[2], gameID);
-                if (!reqResponse.success()) {
-                    out.print(SET_TEXT_COLOR_RED);
+                try {
+                    int gameID = Integer.parseInt(params[1]);
+                    client.HTTPRequestResponse reqResponse = serverFacade.joinGame(params[2], gameID);
+                    if (!reqResponse.success()) {
+                        out.print(SET_TEXT_COLOR_RED);
+                        response = new String[]{"The command failed for one of two reasons: ", "The game you are trying to join does not exist.", reqResponse.message()};
+                    }
+                    else {
+                        clientState = ClientState.DISPLAYGAME;
+                        response = new String[]{reqResponse.message()};
+                    }
                 }
-                else {clientState = ClientState.DISPLAYGAME;}
+                catch (NumberFormatException e) {
+                    out.print(SET_TEXT_COLOR_RED);
+                    response = new String[]{"The game ID must be a number."};
+                }
+            }
+        }
+        else if (line.startsWith("list")){
+            client.HTTPRequestResponse reqResponse = serverFacade.listGames();
+            if (!reqResponse.success()) {
+                out.print(SET_TEXT_COLOR_RED);
                 response = new String[]{reqResponse.message()};
+            }
+            else {
+                // print out each of the games
+                JsonObject httpBody = JsonParser.parseString(reqResponse.httpBody()).getAsJsonObject();
+                Map<String, Collection<GameData>> games = new Gson().fromJson(httpBody, new TypeToken<Map<String,Collection<GameData>>>(){}.getType());
+                List<String> gameDescriptions = new ArrayList<>();
+                gameDescriptions.add("Games: ");
+                for (GameData game : games.get("games")) {
+                    String wUsername;
+                    if (game.whiteUsername() == null) {wUsername = "No white player.";}
+                    else {wUsername = game.whiteUsername();}
+                    if (game.whiteUsername() == null) {wUsername = "No white player.";}
+                    else {wUsername = game.whiteUsername();}
+                    String gameDescription = "Name: " + game.gameName() + ", Game ID: " + game.gameID() + ", White Player Username: " + game.whiteUsername() + ", Black Player Username: " + game.blackUsername();
+                    gameDescriptions.add(gameDescription);
+                }
+                response = gameDescriptions.toArray(new String[gameDescriptions.size()]);
             }
         }
         else if (line.startsWith("observe")){
@@ -219,6 +258,10 @@ public class ClientMain {
             }
             else {clientState = ClientState.LOGGEDOUT;}
             response = new String[]{reqResponse.message()};
+        }
+        else {
+            out.print(SET_TEXT_COLOR_RED);
+            response = new String[]{"The command you entered is not a valid command. Please type help to see what the command options are."};
         }
         printWIndent(out, response);
         return true;
@@ -248,6 +291,10 @@ public class ClientMain {
             }
             else {clientState = ClientState.LOGGEDOUT;}
             response = new String[]{reqResponse.message()};
+        }
+        else {
+            out.print(SET_TEXT_COLOR_RED);
+            response = new String[]{"The command you entered is not a valid command. Please type help to see what the command options are."};
         }
         printWIndent(out, response);
         return true;

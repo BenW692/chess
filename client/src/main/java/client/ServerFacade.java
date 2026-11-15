@@ -101,9 +101,11 @@ public class ServerFacade {
     public HTTPRequestResponse login(LoginRequest loginReq) {
         HTTPRequestResponse response = sendHTTPRequest(loginReq, null, "/session", "post");
         // TODO: this crashed the program when the password was wrong
-        JsonObject httpBody = JsonParser.parseString(response.httpBody()).getAsJsonObject();
-        currUserAuthToken = httpBody.get("authToken").getAsString();
-        header.put("authorization", currUserAuthToken);
+        if (response.success()){
+            JsonObject httpBody = JsonParser.parseString(response.httpBody()).getAsJsonObject();
+            currUserAuthToken = httpBody.get("authToken").getAsString();
+            header.put("authorization", currUserAuthToken);
+        }
         return response;
     }
 
@@ -111,8 +113,8 @@ public class ServerFacade {
         return sendHTTPRequest(null, header, "/session", "delete");
     }
 
-    public void listGames() {
-
+    public HTTPRequestResponse listGames() {
+        return sendHTTPRequest(null, header, "/game", "get");
     }
     public HTTPRequestResponse createGame(String gameName) {
         CreateGameHttpRequest body = new CreateGameHttpRequest(gameName);
