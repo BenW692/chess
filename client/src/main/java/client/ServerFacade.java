@@ -22,7 +22,7 @@ public class ServerFacade {
     private record CreateGameHttpRequest(String gameName) {}
     private record JoinGameHttpRequest(String playerColor, int gameID) {}
 
-    private static final HttpClient HttpClient = HttpClient.newHttpClient();
+    private static final HttpClient HttpClientInstance = HttpClient.newHttpClient();
 
     public ServerFacade(String host, int port) throws Exception {
         this.host = host;
@@ -63,7 +63,7 @@ public class ServerFacade {
             }
             HttpRequest request = builder.build();
 
-            HttpResponse<String> httpResponse = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> httpResponse = HttpClientInstance.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (httpResponse.statusCode() == 200) {
                 result = new HTTPRequestResponse(true, "Action was successful.", httpResponse.body());
