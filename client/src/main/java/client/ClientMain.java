@@ -227,6 +227,7 @@ public class ClientMain {
                     "observe <ID> - observe the specified game"};
         }
         else {
+            serverFacade.observeGame();
             userTeamColor = ChessGame.TeamColor.WHITE;
             clientState = ClientState.DISPLAYGAME;
         }
@@ -391,47 +392,57 @@ public class ClientMain {
         for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_PADDED_CHARS; ++squareRow) {
             for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES+2; ++boardCol) {
                 if (boardCol == 0 || boardCol == BOARD_SIZE_IN_SQUARES+1){
-                    setDarkGreen(out);
-                    if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
-                        if (userTeamColor == ChessGame.TeamColor.WHITE) {
-                            out.print(rowInd.get(boardRow));
-                        }
-                        else {out.print(rowInd.get(BOARD_SIZE_IN_SQUARES - 1 - boardRow));}
-                    }
-                    else {out.print(THREESPACES);}
+                    printBoardBorderColumn(out, boardRow, squareRow, rowInd);
                 }
                 else {
-                    int boardRowType = boardRow % 2;
-                    if (boardRowType == 0) {
-                        if (boardCol % 2 == 0) {
-                            setLightGray(out);
-                        } else {
-                            setDarkGray(out);
-                        }
-                    } else {
-                        if (boardCol % 2 == 0) {
-                            setDarkGray(out);
-                        } else {
-                            setLightGray(out);
-                        }
-                    }
-
-                    if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
-                        int prefixLength = SQUARE_SIZE_IN_PADDED_CHARS / 2;
-                        int suffixLength = SQUARE_SIZE_IN_PADDED_CHARS / 2;
-                        out.print(THREESPACES.repeat(prefixLength));
-                        // we have to subtract 1 off the column for the first col that is the number label
-                        placePiece(out, boardRow, boardCol-1);
-                        out.print(THREESPACES.repeat(suffixLength));
-                    } else {
-                        out.print(THREESPACES.repeat(SQUARE_SIZE_IN_PADDED_CHARS));
-
-                    }
+                    printBoardSquares(out, boardRow, boardCol, squareRow);
                 }
                 setBlack(out);
             }
             out.println();
         }
+    }
+
+    private static void printBoardSquares(PrintStream out, int boardRow, int boardCol, int squareRow) {
+        int boardRowType = boardRow % 2;
+        if (boardRowType == 0) {
+            if (boardCol % 2 == 0) {
+                setLightGray(out);
+            } else {
+                setDarkGray(out);
+            }
+        } else {
+            if (boardCol % 2 == 0) {
+                setDarkGray(out);
+            } else {
+                setLightGray(out);
+            }
+        }
+
+        if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
+            int prefixLength = SQUARE_SIZE_IN_PADDED_CHARS / 2;
+            int suffixLength = SQUARE_SIZE_IN_PADDED_CHARS / 2;
+            out.print(THREESPACES.repeat(prefixLength));
+            // we have to subtract 1 off the column for the first col that is the number label
+            placePiece(out, boardRow, boardCol -1);
+            out.print(THREESPACES.repeat(suffixLength));
+        } else {
+            out.print(THREESPACES.repeat(SQUARE_SIZE_IN_PADDED_CHARS));
+
+        }
+    }
+
+    private static void printBoardBorderColumn(PrintStream out, int boardRow, int squareRow, List<String> rowInd) {
+        setDarkGreen(out);
+        if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
+            if (userTeamColor == ChessGame.TeamColor.WHITE) {
+                out.print(rowInd.get(boardRow));
+            }
+            else {
+                out.print(rowInd.get(BOARD_SIZE_IN_SQUARES - 1 - boardRow));}
+        }
+        else {
+            out.print(THREESPACES);}
     }
 
     private static void placePiece(PrintStream out, int boardRow, int boardCol) {
