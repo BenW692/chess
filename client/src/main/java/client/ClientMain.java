@@ -17,8 +17,8 @@ import java.util.*;
 import static ui.EscapeSequences.*;
 
 public class ClientMain {
-    private static String host;
-    private static int port;
+    private static String host= "localhost";;
+    private static int port= 8080;;
 
     public ClientMain(String host, int port)
     {

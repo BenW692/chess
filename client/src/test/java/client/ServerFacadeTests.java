@@ -22,12 +22,12 @@ public class ServerFacadeTests {
 
     @BeforeAll
     public static void init() throws Exception {
-        int port = 8080;
+        int port = 0;
         server = new Server();
         var serverPort = server.run(port);
         System.out.println("Started test HTTP server on " + serverPort);
         String host = "localhost";
-        serverFacade = new ServerFacade(host, port);
+        serverFacade = new ServerFacade(host, serverPort);
     }
 
     @AfterEach
