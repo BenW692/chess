@@ -10,12 +10,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import client.LoginRequest;
-import client.RegisterRequest;
 
 public class ServerFacade {
     String host;
@@ -25,7 +22,7 @@ public class ServerFacade {
     private record CreateGameHttpRequest(String gameName) {}
     private record JoinGameHttpRequest(String playerColor, int gameID) {}
 
-    private static final HttpClient httpClient = HttpClient.newHttpClient();
+    private static final HttpClient HTTPClient = HttpClient.newHttpClient();
 
     public ServerFacade(String host, int port) throws Exception {
         this.host = host;
@@ -66,7 +63,7 @@ public class ServerFacade {
             }
             HttpRequest request = builder.build();
 
-            HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> httpResponse = HTTPClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (httpResponse.statusCode() == 200) {
                 result = new HTTPRequestResponse(true, "Action was successful.", httpResponse.body());
@@ -77,19 +74,24 @@ public class ServerFacade {
                         "Please type help to see the correct command structure.", null);
             }
             else if (httpResponse.statusCode() == 401) {
-                result = new HTTPRequestResponse(false, "You are not authorized to do this action. Please register and login first.", null);
+                result = new HTTPRequestResponse(false, "You are not authorized to do this action. " +
+                        "Please register and login first.", null);
             }
             else if (httpResponse.statusCode() == 403) {
                 JsonObject obj = JsonParser.parseString(httpResponse.body()).getAsJsonObject();
                 String message = obj.get("message").getAsString();      // "Error: something broke"
                 String errorText = message.replaceFirst("^Error: ", "");  // "something broke"
-                result = new HTTPRequestResponse(false, "That request cannot be completed because " + errorText + ". Please use a different username.", null);
+                result = new HTTPRequestResponse(false, "That request cannot be completed because " + errorText +
+                        ". Please use a different username.", null);
             }
             else {result = new HTTPRequestResponse(false, httpResponse.body(), null);}
         }
-        catch (IOException e) {result = new HTTPRequestResponse(false, "Please make sure the the chess server is running.", null);}
-        catch (InterruptedException e) {result = new HTTPRequestResponse(false, "Connection to the server was lost. Please try again.", null);}
-        catch (URISyntaxException e) {result = new HTTPRequestResponse(false, "Could not connect to the app. Please reach out to the app creator.", null);}
+        catch (IOException e) {result = new HTTPRequestResponse(false, "Please make sure the the chess server is running.",
+                null);}
+        catch (InterruptedException e) {result = new HTTPRequestResponse(false, "Connection to the server was lost. " +
+                "Please try again.", null);}
+        catch (URISyntaxException e) {result = new HTTPRequestResponse(false, "Could not connect to the app. " +
+                "Please reach out to the app creator.", null);}
         catch (Exception e) {result = new HTTPRequestResponse(false, e.getMessage(), null);}
         finally {return result;}
     }
@@ -100,7 +102,6 @@ public class ServerFacade {
 
     public HTTPRequestResponse login(LoginRequest loginReq) {
         HTTPRequestResponse response = sendHTTPRequest(loginReq, null, "/session", "post");
-        // TODO: this crashed the program when the password was wrong
         if (response.success()){
             JsonObject httpBody = JsonParser.parseString(response.httpBody()).getAsJsonObject();
             currUserAuthToken = httpBody.get("authToken").getAsString();

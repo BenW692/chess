@@ -110,39 +110,10 @@ public class ClientMain {
                             "help - description possible commands"};
         }
         else if (line.startsWith("register")) {
-            String[] params =  line.split(" ");
-            if (params.length != 4)
-            {
-                out.print(SET_TEXT_COLOR_RED);
-                response = new String[]{"Register parameters were not entered correctly. Please follow this syntax:",
-                      "register <USERNAME> <PASSWORD> <EMAIL> - to create an account"};
-            }
-            // send this list to server facade
-            else {
-                client.HTTPRequestResponse reqResponse = serverFacade.register(new RegisterRequest(params[1], params[2], params[3]));
-                if (!reqResponse.success()) {
-                    out.print(SET_TEXT_COLOR_RED);
-                }
-                response = new String[]{reqResponse.message()};
-            }
+            response = registerCommand(out, line);
         }
         else if (line.startsWith("login")) {
-            String[] params =  line.split(" ");
-            // send this list to server facade
-            if (params.length != 3)
-            {
-                out.print(SET_TEXT_COLOR_RED);
-                response = new String[]{"Login parameters were not entered correctly. Please follow this syntax:",
-                        "login <USERNAME> <PASSWORD> - to play chess"};
-            }
-            else {
-                client.HTTPRequestResponse reqResponse = serverFacade.login(new LoginRequest(params[1], params[2]));
-                if (!reqResponse.success()) {
-                    out.print(SET_TEXT_COLOR_RED);
-                }
-                else {clientState = ClientState.LOGGEDIN;}
-                response = new String[]{reqResponse.message()};
-            }
+            response = loginCommand(out, line);
         }
         else {
             out.print(SET_TEXT_COLOR_RED);
@@ -150,6 +121,47 @@ public class ClientMain {
         }
         printWIndent(out, response);
         return true;
+    }
+
+    private static String[] loginCommand(PrintStream out, String line) {
+        String[] response;
+        String[] params =  line.split(" ");
+        // send this list to server facade
+        if (params.length != 3)
+        {
+            out.print(SET_TEXT_COLOR_RED);
+            response = new String[]{"Login parameters were not entered correctly. Please follow this syntax:",
+                    "login <USERNAME> <PASSWORD> - to play chess"};
+        }
+        else {
+            HTTPRequestResponse reqResponse = serverFacade.login(new LoginRequest(params[1], params[2]));
+            if (!reqResponse.success()) {
+                out.print(SET_TEXT_COLOR_RED);
+            }
+            else {clientState = ClientState.LOGGEDIN;}
+            response = new String[]{reqResponse.message()};
+        }
+        return response;
+    }
+
+    private static String[] registerCommand(PrintStream out, String line) {
+        String[] response;
+        String[] params =  line.split(" ");
+        if (params.length != 4)
+        {
+            out.print(SET_TEXT_COLOR_RED);
+            response = new String[]{"Register parameters were not entered correctly. Please follow this syntax:",
+                  "register <USERNAME> <PASSWORD> <EMAIL> - to create an account"};
+        }
+        // send this list to server facade
+        else {
+            HTTPRequestResponse reqResponse = serverFacade.register(new RegisterRequest(params[1], params[2], params[3]));
+            if (!reqResponse.success()) {
+                out.print(SET_TEXT_COLOR_RED);
+            }
+            response = new String[]{reqResponse.message()};
+        }
+        return response;
     }
 
     private static boolean loggedInUI(PrintStream out, Scanner scanner) {
@@ -173,104 +185,19 @@ public class ClientMain {
                     "help - description of possible commands"};
         }
         else if (line.startsWith("create")) {
-            String[] params =  line.split(" ");
-            if (params.length != 2)
-            {
-                out.print(SET_TEXT_COLOR_RED);
-                response = new String[]{"Create parameters were not entered correctly. Please follow this syntax:",
-                        "create <NAME> - creates a new game"};
-            }
-            else {
-                client.HTTPRequestResponse reqResponse = serverFacade.createGame(params[1]);
-                if (!reqResponse.success()) {
-                    out.print(SET_TEXT_COLOR_RED);
-                    response = new String[]{reqResponse.message()};
-                }
-                else {
-                    JsonObject httpBody = JsonParser.parseString(reqResponse.httpBody()).getAsJsonObject();
-                    String gameID = httpBody.get("gameID").getAsString();
-                    response = new String[]{reqResponse.message(), "The gameID on the game you just created is: " + gameID};
-                }
-            }
+            response = createGameCommand(out, line);
         }
         else if (line.startsWith("join")) {
-            // TODO: when we join or observe a game we can set the gameBoard to the board for that actual game
-            String[] params =  line.split(" ");
-            // send this list to server facade
-            if (params.length != 3)
-            {
-                out.print(SET_TEXT_COLOR_RED);
-                response = new String[]{"Join parameters were not entered correctly. Please follow this syntax:",
-                        "join <ID> [WHITE or BLACK] - join a game as the specified team color"};
-            }
-            else {
-                if (params[2].equalsIgnoreCase("white")) {
-                    userTeamColor = ChessGame.TeamColor.WHITE;
-                } else {
-                    userTeamColor = ChessGame.TeamColor.BLACK;
-                }
-                try {
-                    int gameID = Integer.parseInt(params[1]);
-                    client.HTTPRequestResponse reqResponse = serverFacade.joinGame(params[2], gameID);
-                    if (!reqResponse.success()) {
-                        out.print(SET_TEXT_COLOR_RED);
-                        response = new String[]{"The command failed for one of two reasons: ", "The game you are trying to join does not exist.", reqResponse.message()};
-                    }
-                    else {
-                        clientState = ClientState.DISPLAYGAME;
-                        response = new String[]{reqResponse.message()};
-                    }
-                }
-                catch (NumberFormatException e) {
-                    out.print(SET_TEXT_COLOR_RED);
-                    response = new String[]{"The game ID must be a number."};
-                }
-            }
+            response = joinGameCommand(out, line);
         }
         else if (line.startsWith("list")){
-            client.HTTPRequestResponse reqResponse = serverFacade.listGames();
-            if (!reqResponse.success()) {
-                out.print(SET_TEXT_COLOR_RED);
-                response = new String[]{reqResponse.message()};
-            }
-            else {
-                // print out each of the games
-                JsonObject httpBody = JsonParser.parseString(reqResponse.httpBody()).getAsJsonObject();
-                Map<String, Collection<GameData>> games = new Gson().fromJson(httpBody, new TypeToken<Map<String,Collection<GameData>>>(){}.getType());
-                List<String> gameDescriptions = new ArrayList<>();
-                gameDescriptions.add("Games: ");
-                for (GameData game : games.get("games")) {
-                    String wUsername;
-                    if (game.whiteUsername() == null) {wUsername = "No white player.";}
-                    else {wUsername = game.whiteUsername();}
-                    if (game.whiteUsername() == null) {wUsername = "No white player.";}
-                    else {wUsername = game.whiteUsername();}
-                    String gameDescription = "Name: " + game.gameName() + ", Game ID: " + game.gameID() + ", White Player Username: " + game.whiteUsername() + ", Black Player Username: " + game.blackUsername();
-                    gameDescriptions.add(gameDescription);
-                }
-                response = gameDescriptions.toArray(new String[gameDescriptions.size()]);
-            }
+            response = listGamesCommand(out);
         }
         else if (line.startsWith("observe")){
-            String[] params =  line.split(" ");
-            if (params.length != 2)
-            {
-                out.print(SET_TEXT_COLOR_RED);
-                response = new String[]{"Observe parameters were not entered correctly. Please follow this syntax:",
-                        "observe <ID> - observe the specified game"};
-            }
-            else {
-                userTeamColor = ChessGame.TeamColor.WHITE;
-                clientState = ClientState.DISPLAYGAME;
-            }
+            response = observeCommand(out, line, response);
         }
         else if (line.equalsIgnoreCase("logout")){
-            client.HTTPRequestResponse reqResponse = serverFacade.logout();
-            if (!reqResponse.success()) {
-                out.print(SET_TEXT_COLOR_RED);
-            }
-            else {clientState = ClientState.LOGGEDOUT;}
-            response = new String[]{reqResponse.message()};
+            response = logoutCommand(out);
         }
         else {
             out.print(SET_TEXT_COLOR_RED);
@@ -278,6 +205,122 @@ public class ClientMain {
         }
         printWIndent(out, response);
         return true;
+    }
+
+    private static String[] logoutCommand(PrintStream out) {
+        String[] response;
+        HTTPRequestResponse reqResponse = serverFacade.logout();
+        if (!reqResponse.success()) {
+            out.print(SET_TEXT_COLOR_RED);
+        }
+        else {clientState = ClientState.LOGGEDOUT;}
+        response = new String[]{reqResponse.message()};
+        return response;
+    }
+
+    private static String[] observeCommand(PrintStream out, String line, String[] response) {
+        String[] params =  line.split(" ");
+        if (params.length != 2)
+        {
+            out.print(SET_TEXT_COLOR_RED);
+            response = new String[]{"Observe parameters were not entered correctly. Please follow this syntax:",
+                    "observe <ID> - observe the specified game"};
+        }
+        else {
+            userTeamColor = ChessGame.TeamColor.WHITE;
+            clientState = ClientState.DISPLAYGAME;
+        }
+        return response;
+    }
+
+    private static String[] listGamesCommand(PrintStream out) {
+        String[] response;
+        HTTPRequestResponse reqResponse = serverFacade.listGames();
+        if (!reqResponse.success()) {
+            out.print(SET_TEXT_COLOR_RED);
+            response = new String[]{reqResponse.message()};
+        }
+        else {
+            // print out each of the games
+            JsonObject httpBody = JsonParser.parseString(reqResponse.httpBody()).getAsJsonObject();
+            Map<String, Collection<GameData>> games = new Gson().fromJson(httpBody, new TypeToken<Map<String,Collection<GameData>>>(){}.getType());
+            List<String> gameDescriptions = new ArrayList<>();
+            gameDescriptions.add("Games: ");
+            for (GameData game : games.get("games")) {
+                String wUsername;
+                String bUsername;
+                if (game.whiteUsername() == null) {wUsername = "No white player.";}
+                else {wUsername = game.whiteUsername();}
+                if (game.blackUsername() == null) {bUsername = "No black player.";}
+                else {bUsername = game.whiteUsername();}
+                String gameDescription = "Name: " + game.gameName() + ", Game ID: " + game.gameID() + ", White Player Username: " + wUsername +
+                        ", Black Player Username: " + bUsername;
+                gameDescriptions.add(gameDescription);
+            }
+            response = gameDescriptions.toArray(new String[gameDescriptions.size()]);
+        }
+        return response;
+    }
+
+    private static String[] joinGameCommand(PrintStream out, String line) {
+        String[] response;
+        String[] params =  line.split(" ");
+        // send this list to server facade
+        if (params.length != 3)
+        {
+            out.print(SET_TEXT_COLOR_RED);
+            response = new String[]{"Join parameters were not entered correctly. Please follow this syntax:",
+                    "join <ID> [WHITE or BLACK] - join a game as the specified team color"};
+        }
+        else {
+            if (params[2].equalsIgnoreCase("white")) {
+                userTeamColor = ChessGame.TeamColor.WHITE;
+            } else {
+                userTeamColor = ChessGame.TeamColor.BLACK;
+            }
+            try {
+                int gameID = Integer.parseInt(params[1]);
+                HTTPRequestResponse reqResponse = serverFacade.joinGame(params[2], gameID);
+                if (!reqResponse.success()) {
+                    out.print(SET_TEXT_COLOR_RED);
+                    response = new String[]{"The command failed for one of two reasons: ", "The game you are trying to join does not exist.",
+                            reqResponse.message()};
+                }
+                else {
+                    clientState = ClientState.DISPLAYGAME;
+                    response = new String[]{reqResponse.message()};
+                }
+            }
+            catch (NumberFormatException e) {
+                out.print(SET_TEXT_COLOR_RED);
+                response = new String[]{"The game ID must be a number."};
+            }
+        }
+        return response;
+    }
+
+    private static String[] createGameCommand(PrintStream out, String line) {
+        String[] response;
+        String[] params =  line.split(" ");
+        if (params.length != 2)
+        {
+            out.print(SET_TEXT_COLOR_RED);
+            response = new String[]{"Create parameters were not entered correctly. Please follow this syntax:",
+                    "create <NAME> - creates a new game"};
+        }
+        else {
+            HTTPRequestResponse reqResponse = serverFacade.createGame(params[1]);
+            if (!reqResponse.success()) {
+                out.print(SET_TEXT_COLOR_RED);
+                response = new String[]{reqResponse.message()};
+            }
+            else {
+                JsonObject httpBody = JsonParser.parseString(reqResponse.httpBody()).getAsJsonObject();
+                String gameID = httpBody.get("gameID").getAsString();
+                response = new String[]{reqResponse.message(), "The gameID on the game you just created is: " + gameID};
+            }
+        }
+        return response;
     }
 
     private static boolean gameplayUI(PrintStream out, Scanner scanner) {
@@ -298,12 +341,7 @@ public class ClientMain {
                     "help - description possible commands"};
         }
         else if (line.equalsIgnoreCase("logout")){
-            client.HTTPRequestResponse reqResponse = serverFacade.logout();
-            if (!reqResponse.success()) {
-                out.print(SET_TEXT_COLOR_RED);
-            }
-            else {clientState = ClientState.LOGGEDOUT;}
-            response = new String[]{reqResponse.message()};
+            response = logoutCommand(out);
         }
         else {
             out.print(SET_TEXT_COLOR_RED);
