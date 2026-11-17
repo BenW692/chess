@@ -110,18 +110,30 @@ public class ServerFacade {
     }
 
     public HTTPRequestResponse logout() {
+        if (header.isEmpty()) {
+            return new HTTPRequestResponse(false, "You are unauthorized to do this action. Please login first.", null);
+        }
         return sendHTTPRequest(null, header, "/session", "delete");
     }
 
     public HTTPRequestResponse listGames() {
+        if (header.isEmpty()) {
+            return new HTTPRequestResponse(false, "You are unauthorized to do this action. Please login first.", null);
+        }
         return sendHTTPRequest(null, header, "/game", "get");
     }
     public HTTPRequestResponse createGame(String gameName) {
+        if (header.isEmpty()) {
+            return new HTTPRequestResponse(false, "You are unauthorized to do this action. Please login first.", null);
+        }
         CreateGameHttpRequest body = new CreateGameHttpRequest(gameName);
         return sendHTTPRequest(body, header, "/game", "post");
     }
 
     public HTTPRequestResponse joinGame(String playerColor, int gameID) {
+        if (header.isEmpty()) {
+            return new HTTPRequestResponse(false, "You are unauthorized to do this action. Please login first.", null);
+        }
         JoinGameHttpRequest gameReq = new JoinGameHttpRequest(playerColor.toUpperCase(), gameID);
         return sendHTTPRequest(gameReq, header, "/game", "put");
     }
@@ -132,7 +144,9 @@ public class ServerFacade {
 
     public void clearApp() {
         HTTPRequestResponse result = sendHTTPRequest(null, null, "/db", "delete");
-        System.out.print(result.message());
+        header.clear();
+        if (result.success()) {System.out.print(result.message());}
+        else {System.out.print("There was an error clearing the database. Please ensure the server is still running.");}
     }
 }
 

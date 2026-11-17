@@ -20,7 +20,18 @@ import java.util.*;
 import static ui.EscapeSequences.*;
 
 public class ClientMain {
+    private static String host;
+    private static int port;
 
+    public ClientMain(String host, int port)
+    {
+        this.host = host;
+        this.port = port;
+    }
+    public ClientMain () {
+        host = "localhost";
+        port = 8080;
+    }
     enum ClientState {
         LOGGEDOUT,
         LOGGEDIN,
@@ -42,7 +53,7 @@ public class ClientMain {
 
     public static void main(String[] args) throws Exception {
         // create an instance of server facade and create an http client
-        serverFacade = new ServerFacade("localhost", 8080);
+        serverFacade = new ServerFacade(host, port);
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.println("♕ Welcome to 240 Chess. Type help to see how gameplay works.");
         Scanner scanner = new Scanner(System.in);
@@ -64,20 +75,24 @@ public class ClientMain {
                     }
                 }
                 case ClientState.DISPLAYGAME -> {
-                    gameBoard = new ChessBoard();
-                    gameBoard.resetBoard();
-                    out.print(ERASE_SCREEN);
-                    drawColDescr(out);
-                    drawChessBoard(out);
-                    drawColDescr(out);
-                    out.print(SET_BG_COLOR_BLACK);
-                    out.print(SET_TEXT_COLOR_WHITE);
+                    displayChessBoard(out);
                     if (!gameplayUI(out, scanner)) {
                         return;
                     }
                 }
             }
         }
+    }
+
+    private static void displayChessBoard(PrintStream out) {
+        gameBoard = new ChessBoard();
+        gameBoard.resetBoard();
+        out.print(ERASE_SCREEN);
+        drawColDescr(out);
+        drawChessBoard(out);
+        drawColDescr(out);
+        out.print(SET_BG_COLOR_BLACK);
+        out.print(SET_TEXT_COLOR_WHITE);
     }
 
     private static boolean loggedOutUI(PrintStream out, Scanner scanner) {
@@ -182,6 +197,7 @@ public class ClientMain {
             }
         }
         else if (line.startsWith("join")) {
+            // TODO: when we join or observe a game we can set the gameBoard to the board for that actual game
             String[] params =  line.split(" ");
             // send this list to server facade
             if (params.length != 3)
