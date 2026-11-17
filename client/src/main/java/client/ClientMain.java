@@ -9,9 +9,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import model.GameData;
-import model.JoinGameRequest;
-import model.LoginRequest;
-import model.RegisterRequest;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;

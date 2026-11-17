@@ -14,8 +14,8 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import model.LoginRequest;
-import model.RegisterRequest;
+import client.LoginRequest;
+import client.RegisterRequest;
 
 public class ServerFacade {
     String host;

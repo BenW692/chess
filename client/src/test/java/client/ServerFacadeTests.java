@@ -5,8 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import model.GameData;
-import model.LoginRequest;
-import model.RegisterRequest;
 import org.junit.jupiter.api.*;
 import server.Server;
 
@@ -20,7 +18,7 @@ public class ServerFacadeTests {
 
     private static Server server;
     private static ServerFacade serverFacade;
-    private RegisterRequest regReq = new RegisterRequest("test", "test", "test@gmail.com");
+    private client.RegisterRequest regReq = new RegisterRequest("test", "test", "test@gmail.com");
 
     @BeforeAll
     public static void init() throws Exception {
