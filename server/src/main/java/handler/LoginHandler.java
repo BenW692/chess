@@ -6,7 +6,6 @@ import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import model.LoginRequest;
 import model.LoginResult;
-import model.RegisterResult;
 import org.jetbrains.annotations.NotNull;
 import service.UserService;
 

@@ -13,6 +13,8 @@ import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import jakarta.websocket.*;
+import model.*;
 
 public class ServerFacade {
     String host;
@@ -23,6 +25,8 @@ public class ServerFacade {
     private record JoinGameHttpRequest(String playerColor, int gameID) {}
 
     private static final HttpClient HTTP_CLIENT_INSTANCE = HttpClient.newHttpClient();
+
+    private WebSocketCommunicator webSocketCommunicator;
 
     public ServerFacade(String host, int port) throws Exception {
         this.host = host;
@@ -136,7 +140,10 @@ public class ServerFacade {
             return new HTTPRequestResponse(false, "You are unauthorized to do this action. Please login first.", null);
         }
         JoinGameHttpRequest gameReq = new JoinGameHttpRequest(playerColor.toUpperCase(), gameID);
-        return sendHTTPRequest(gameReq, header, "/game", "put");
+        HTTPRequestResponse res = sendHTTPRequest(gameReq, header, "/game", "put");
+        webSocketCommunicator = new WebSocketCommunicator(host, port);
+
+        return res;
     }
 
     public void observeGame() {

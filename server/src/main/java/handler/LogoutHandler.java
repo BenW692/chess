@@ -3,8 +3,6 @@ package handler;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.SessionDAO;
-import dataaccess.UnauthorizedException;
-import dataaccess.UserNotFoundException;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import model.LogoutRequest;

@@ -1,12 +1,9 @@
 package handler;
 import com.google.gson.Gson;
-import dataaccess.AlreadyTakenException;
-import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
 import dataaccess.SessionDAO;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
-import model.AuthData;
 import model.RegisterRequest;
 import model.RegisterResult;
 import service.UserService;

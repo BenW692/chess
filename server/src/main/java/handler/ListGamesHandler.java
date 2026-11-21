@@ -3,7 +3,6 @@ package handler;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.SessionDAO;
-import dataaccess.UnauthorizedException;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import model.ListGameRequest;
@@ -11,9 +10,6 @@ import model.ListGameResult;
 import org.jetbrains.annotations.NotNull;
 import service.GameService;
 import service.UserService;
-
-import java.util.List;
-import java.util.Map;
 
 public class ListGamesHandler implements Handler {
     SessionDAO sessionDAO;

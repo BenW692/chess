@@ -38,6 +38,7 @@ public class Server {
         javalin.get("/game", listGamesHandler);
         javalin.post("/game", createGameHandler);
         javalin.put("/game", joinGameHandler);
+        setupWs();
         javalin.exception(Exception.class, this::exceptionHandler);
     }
 
@@ -64,5 +65,17 @@ public class Server {
 
     public void stop() {
         javalin.stop();
+    }
+
+    private void setupWs() {
+        javalin.get("/echo/{msg}", ctx -> ctx.result("HTTP response: " + ctx.pathParam("msg")))
+                .ws("/ws", ws -> {
+                ws.onConnect(ctx -> {
+                    ctx.enableAutomaticPings();
+                    System.out.println("WebSocket connected");
+                });
+            ws.onMessage(ctx -> ctx.send("WebSocket response: " + ctx.message()));
+            ws.onClose(ctx -> System.out.println("WebSocket closed"));
+        });
     }
 }
