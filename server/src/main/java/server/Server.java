@@ -6,6 +6,9 @@ import dataaccess.sql.SqlSessionDAO;
 import handler.*;
 import io.javalin.*;
 import io.javalin.http.Context;
+import io.javalin.websocket.WsMessageContext;
+import jakarta.websocket.Session;
+import websocket.commands.UserGameCommand;
 
 import java.util.Map;
 
@@ -30,6 +33,7 @@ public class Server {
         final ListGamesHandler listGamesHandler = new ListGamesHandler(sessionDAO);
         final CreateGameHandler createGameHandler = new CreateGameHandler(sessionDAO);
         final JoinGameHandler joinGameHandler = new JoinGameHandler(sessionDAO);
+        final WebSocketHandler webSocketHandler = new WebSocketHandler(sessionDAO);
         // Register your endpoints and exception handlers here.
         javalin.post("/user", regHandler);
         javalin.delete("/db", clearAppHandler);
@@ -38,7 +42,7 @@ public class Server {
         javalin.get("/game", listGamesHandler);
         javalin.post("/game", createGameHandler);
         javalin.put("/game", joinGameHandler);
-        setupWs();
+        setupWs(webSocketHandler);
         javalin.exception(Exception.class, this::exceptionHandler);
     }
 
@@ -67,15 +71,11 @@ public class Server {
         javalin.stop();
     }
 
-    private void setupWs() {
-        javalin.get("/echo/{msg}", ctx -> ctx.result("HTTP response: " + ctx.pathParam("msg")))
-                .ws("/ws", ws -> {
-                ws.onConnect(ctx -> {
-                    ctx.enableAutomaticPings();
-                    System.out.println("WebSocket connected");
-                });
-            ws.onMessage(ctx -> ctx.send("WebSocket response: " + ctx.message()));
-            ws.onClose(ctx -> System.out.println("WebSocket closed"));
+    private void setupWs(WebSocketHandler wsHandler) {
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(wsHandler);
+            ws.onMessage(wsHandler);
+            ws.onClose(wsHandler);
         });
     }
 }
